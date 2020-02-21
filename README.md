@@ -1,4 +1,4 @@
-# Python converstion scripts 'from' and 'to' annotate.online format to other common formats.
+# Python converstion scripts between annotate.online format and other common formats.
 
 
 ## 'From' COCO output 'To' annotate.online input format

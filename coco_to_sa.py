@@ -1,21 +1,13 @@
 import argparse
 import os
 import json
-
 import requests
-import random
+import randomcolor
+import cv2
 
 from collections import defaultdict
 from pycocotools.coco import COCO
 from imantics import Polygons, Mask
-
-# for panoptic segmentation
-import cv2
-import matplotlib.pyplot as plt
-
-from sklearn.cluster import KMeans
-from collections import Counter
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--coco_json", type=str, required=True, help="Argument must be JSON file")
@@ -50,23 +42,14 @@ def image_downloader(url):
 
 # Generates colors in range(n)
 def color_generator(n):
-    hex_values = []
-    for _ in range(n):
-        r = hex(random.randrange(0, 256))
-        g = hex(random.randrange(0, 256))
-        b = hex(random.randrange(0, 256))
-        r = r[2:]
-        g = g[2:]
-        b = b[2:]
-        if len(r) < 2:
-            r = "0" + r
-        if len(g) < 2:
-            g = "0" + g
-        if len(b) < 2:
-            b = "0" + b
-        z = r + g + b
-        hex_values.append("#" + z)
-    return hex_values
+    rand_color = randomcolor.RandomColor()
+    return rand_color.generate(count=n)
+
+
+# Generates colors in range(n)
+def blue_color_generator(n):
+    rand_color = randomcolor.RandomColor()
+    return rand_color.generate(hue="blue", count=n)
 
 
 # Converts RLE format to polygon segmentation for object detection and keypoints
@@ -89,11 +72,6 @@ def dict_setter(list_of_dicts):
     return [j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]]
 
 
-# converts RGB color format to HEX color format
-def RGB2HEX(color):
-    return "#{:02x}{:02x}{:02x}".format(int(color[0]), int(color[1]), int(color[2]))
-
-
 # image getter
 def get_image(image_path):
     image = cv2.imread(image_path)
@@ -101,25 +79,9 @@ def get_image(image_path):
     return image
 
 
-# Returns all colors in picture
-def get_color(image, number_of_colors):
-    modified_image = cv2.resize(image, (600, 400), interpolation=cv2.INTER_AREA)
-    modified_image = modified_image.reshape(modified_image.shape[0]*modified_image.shape[1], 3)
-    clf = KMeans(n_clusters=number_of_colors)
-    labels = clf.fit_predict(modified_image)
-    counts = Counter(labels)
-
-    center_colors = clf.cluster_centers_
-    ordered_colors = [center_colors[i] for i in counts.keys()]
-    hex_colors = [RGB2HEX(ordered_colors[i]) for i in counts.keys()]
-    rgb_colors = [ordered_colors[i] for i in counts.keys()]
-
-    return hex_colors
-
-
 """download images"""
-# for i in range(len(json_data['images'])):
-#     image_downloader(json_data['images'][i]['coco_url'])
+for i in range(len(json_data['images'])):
+    image_downloader(json_data['images'][i]['coco_url'])
 
 """classes"""
 for c in range(len(json_data['categories'])):
@@ -173,8 +135,7 @@ if str(coco_json_file).__contains__('instances'):
 
 """ panoptic """
 if str(coco_json_file).__contains__('panoptic'):
-    for i in range(len(json_data['annotations'])):
-        print(json_data['annotations'][i]['file_name'], get_color(get_image(os.path.join(main_dir, json_data['annotations'][i]['file_name'])), len(json_data['annotations'][i]['segments_info'])), len(json_data['annotations'][i]['segments_info']), '\n')
+    blue_colors = []
 
     # pan_loader = []
     # for annot in json_data['annotations']:

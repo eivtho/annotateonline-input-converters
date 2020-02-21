@@ -1,11 +1,11 @@
-# Convert from LabelBox and COCO formats to annotate.online input format.
+# Python converstion scripts 'from' and 'to' annotate.online format to other common formats.
 
 
-## To convert to annotate.online input format from a COCO type annotation:
+## 'From' COCO output 'To' annotate.online input format
 
     python3 coco_sa_converter.py --coco_json <input_coco_json>
 
-## To convert to annotate.online input format from a LabelBox export type annotation:
+## 'From' LabelBox output 'To' annotate.online input format
 
     python3 labelbox_format_converter.py --lb_json <input_labelbox_json>
 

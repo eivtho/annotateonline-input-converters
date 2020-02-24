@@ -2,11 +2,11 @@
 
 ## Usage
 
-### 'From' COCO output 'To' annotate.online input format
+### *From* COCO output *to* annotate.online input format
 
-    python3 coco_to_sa.py --coco_json <input_coco_json>
+    python3 coco_to_sa.py --coco-json <input_coco_json>
 
-### 'From' annotate.online output 'To' COCO input format
+### *From* annotate.online output *to* COCO input format
 
 #### Panoptic annotation:
 
@@ -16,7 +16,7 @@
 
     python3 sa_to_coco.py --sa_vector_dataset <input_sa_json> --export_root <export_path>
 
-### 'From' LabelBox output 'To' annotate.online input format
+### *From* LabelBox output *to* annotate.online input format
 
     python3 labelbox_to_sa.py --lb_json <input_labelbox_json>
 

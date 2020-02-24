@@ -11,7 +11,7 @@ from pycocotools.coco import COCO
 from imantics import Polygons, Mask
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--coco_json", type=str, required=True, help="Argument must be JSON file")
+parser.add_argument("--coco-json", type=str, required=True, help="Argument must be JSON file")
 p = parser.parse_args()
 
 coco_json = p.coco_json

@@ -4,6 +4,7 @@ import json
 import requests
 import randomcolor
 import cv2
+import extcolors
 
 from collections import defaultdict
 from pycocotools.coco import COCO
@@ -83,6 +84,7 @@ def get_image(image_path):
 for i in range(len(json_data['images'])):
     image_downloader(json_data['images'][i]['coco_url'])
 
+
 """classes"""
 for c in range(len(json_data['categories'])):
     colors = color_generator(len(json_data['categories']))
@@ -93,6 +95,7 @@ for c in range(len(json_data['categories'])):
 res_list = [i for n, i in enumerate(classes_loader) if i not in classes_loader[n + 1:]]
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)
+
 
 """ instances """
 if str(coco_json_file).__contains__('instances'):
@@ -135,7 +138,10 @@ if str(coco_json_file).__contains__('instances'):
 
 """ panoptic """
 if str(coco_json_file).__contains__('panoptic'):
-    blue_colors = []
+
+    for img in json_data['images']:
+        colors, pixel_count = extcolors.extract(os.path.join(main_dir, img['file_name'].replace('jpg', 'png')))
+        print(colors)
 
     # pan_loader = []
     # for annot in json_data['annotations']:

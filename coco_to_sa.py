@@ -7,7 +7,6 @@ import numpy as np
 
 from collections import defaultdict
 from pycocotools.coco import COCO
-from imantics import Polygons, Mask
 from PIL import Image
 
 parser = argparse.ArgumentParser()
@@ -61,8 +60,21 @@ def blue_color_generator(n):
 # Converts RLE format to polygon segmentation for object detection and keypoints
 def rle_to_polygon(annotation):
     coco = COCO(coco_json)
-    polygons = Mask(coco.annToMask(annotation)).polygons()
-    return polygons.segmentation
+    image_id = annotation["image_id"]
+    image_info = coco.loadImgs([image_id])[0]
+    binary_mask = coco.annToMask(annotation)
+    cv2.imwrite(image_info["file_name"], binary_mask*255)
+    contours, hierarchy = cv2.findContours(binary_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    segmentation = []
+
+    for contour in contours:
+        contour = contour.flatten().tolist()
+        if len(contour) > 4:
+            segmentation.append(contour)
+        if len(segmentation) == 0:
+            continue
+    print(len(segmentation))
+    return segmentation
 
 
 # Merges tuples by first key
@@ -106,8 +118,8 @@ with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)
 
 
-""" instances """
-if str(coco_json_file).__contains__('instances'):
+# instances
+if 'instances' in str(coco_json_file):
 
     loader = []
     for annot in json_data['annotations']:
@@ -145,8 +157,8 @@ if str(coco_json_file).__contains__('instances'):
                 with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
                     json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
 
-""" panoptic """
-if str(coco_json_file).__contains__('panoptic'):
+# panoptic
+if 'panoptic' in str(coco_json_file):
 
     # for img in json_data['images']:
     #     im = Image.open(os.path.join(main_dir, img['file_name'].replace('jpg', 'png')))
@@ -177,8 +189,8 @@ if str(coco_json_file).__contains__('panoptic'):
                 with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
                     json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
 
-""" keypoints """
-if str(coco_json_file).__contains__('keypoints'):
+# keypoints
+if 'keypoints' in str(coco_json_file):
     kp_loader = []
 
     kp_point_loader = []
@@ -222,39 +234,39 @@ if str(coco_json_file).__contains__('keypoints'):
                                       'locked': False, 'visible': True, 'groupId': annot['id'], 'imageId': annot['image_id']}
                                      for p in range(len(annot['segmentation']))]
 
-                sa_template = {'type': 'template', 'classId': cat['id'], 'probability': 100, 'points': [], 'connections': [],
-                               'attributes': [], 'groupId': annot['id'], 'pointLabels': {}, 'locked': False, 'visible': True,
-                               'templateId': annot['id'] - 1, 'className': cat['name'], 'templateName': 'skeleton',
-                               'imageId': annot['image_id']}
+                # sa_template = {'type': 'template', 'classId': cat['id'], 'probability': 100, 'points': [], 'connections': [],
+                #                'attributes': [], 'groupId': annot['id'], 'pointLabels': {}, 'locked': False, 'visible': True,
+                #                'templateId': annot['id'] - 1, 'className': cat['name'], 'templateName': 'skeleton',
+                #                'imageId': annot['image_id']}
 
-                for img_id, group_id, img_kps in kp_ids_loader:
-                    for loader_img_id, loader_point_data in kp_point_loader:
-                        if type(img_kps) is int:
-                            for pl_k, pl_v in sa_point_labels.items():
-                                if img_kps == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id:
-                                    sa_template['points'].append({'id': loader_point_data[1], 'x': loader_point_data[2],
-                                                                  'y': loader_point_data[3]})
-                                    sa_template['pointLabels'][pl_k] = pl_v
-                        else:
-                            for img_kp in img_kps:
-                                for pl_k, pl_v in sa_point_labels.items():
-                                    if img_kp == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id \
-                                            and group_id == sa_template['groupId'] and loader_point_data[0] == sa_template['groupId']:
-                                        sa_template['pointLabels'][pl_k] = pl_v
-                                        sa_template['points'].append(
-                                            {'id': loader_point_data[1], 'x': loader_point_data[2],
-                                             'y': loader_point_data[3]})
-
-                            for skeleton in cat['skeleton']:
-                                if loader_img_id == img_id and loader_point_data[0] == sa_template['groupId']\
-                                        and skeleton[0] in img_kps and skeleton[1] in img_kps:
-                                    sa_template['connections'].append({'id': 1, 'from': skeleton[0], 'to': skeleton[1]})
-
-                sa_template['points'] = dict_setter(sa_template['points'])
-                sa_template['connections'] = dict_setter(sa_template['connections'])
-
-                for i in range(len(sa_template['connections'])):
-                    sa_template['connections'][i]['id'] += i
+                # for img_id, group_id, img_kps in kp_ids_loader:
+                #     for loader_img_id, loader_point_data in kp_point_loader:
+                #         if type(img_kps) is int:
+                #             for pl_k, pl_v in sa_point_labels.items():
+                #                 if img_kps == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id:
+                #                     sa_template['points'].append({'id': loader_point_data[1], 'x': loader_point_data[2],
+                #                                                   'y': loader_point_data[3]})
+                #                     sa_template['pointLabels'][pl_k] = pl_v
+                #         else:
+                #             for img_kp in img_kps:
+                #                 for pl_k, pl_v in sa_point_labels.items():
+                #                     if img_kp == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id \
+                #                             and group_id == sa_template['groupId'] and loader_point_data[0] == sa_template['groupId']:
+                #                         sa_template['pointLabels'][pl_k] = pl_v
+                #                         sa_template['points'].append(
+                #                             {'id': loader_point_data[1], 'x': loader_point_data[2],
+                #                              'y': loader_point_data[3]})
+                #
+                #             for skeleton in cat['skeleton']:
+                #                 if loader_img_id == img_id and loader_point_data[0] == sa_template['groupId']\
+                #                         and skeleton[0] in img_kps and skeleton[1] in img_kps:
+                #                     sa_template['connections'].append({'id': 1, 'from': skeleton[0], 'to': skeleton[1]})
+                #
+                # sa_template['points'] = dict_setter(sa_template['points'])
+                # sa_template['connections'] = dict_setter(sa_template['connections'])
+                #
+                # for i in range(len(sa_template['connections'])):
+                #     sa_template['connections'][i]['id'] += i
 
                 for img in json_data['images']:
                     for polygon in sa_polygon_loader:
@@ -262,8 +274,8 @@ if str(coco_json_file).__contains__('keypoints'):
                             kp_loader.append((img['id'], polygon))
                         if sa_dict_bbox['imageId'] == img['id']:
                             kp_loader.append((img['id'], sa_dict_bbox))
-                        if sa_template['imageId'] == img['id']:
-                            kp_loader.append((img['id'], sa_template))
+                        # if sa_template['imageId'] == img['id']:
+                        #     kp_loader.append((img['id'], sa_template))
 
     for img in json_data['images']:
         f_loader = []

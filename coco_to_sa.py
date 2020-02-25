@@ -2,13 +2,13 @@ import argparse
 import os
 import json
 import requests
-import randomcolor
 import cv2
-import extcolors
+import numpy as np
 
 from collections import defaultdict
 from pycocotools.coco import COCO
 from imantics import Polygons, Mask
+from PIL import Image
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--coco-json", type=str, required=True, help="Argument must be JSON file")
@@ -41,16 +41,21 @@ def image_downloader(url):
         f.write(r.content)
 
 
-# Generates colors in range(n)
-def color_generator(n):
-    rand_color = randomcolor.RandomColor()
-    return rand_color.generate(count=n)
+# Converts HEX values to RGB values
+def hex_to_rgb(hex_string):
+    h = hex_string.lstrip('#')
+    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 
 
-# Generates colors in range(n)
+# Generates blue colors in range(n)
 def blue_color_generator(n):
-    rand_color = randomcolor.RandomColor()
-    return rand_color.generate(hue="blue", count=n)
+    hex_colors = []
+    for i in range(n):
+        int_color = i*15
+        bgr_color = np.array([int_color & 255, (int_color >> 8) & 255, (int_color >> 16) & 255, 255], dtype=np.uint8)
+        hex_color = '#' + "{:02x}".format(bgr_color[2], 'x') + "{:02x}".format(bgr_color[1], 'x') + "{:02x}".format(bgr_color[0], 'x')
+        hex_colors.append(hex_color)
+    return hex_colors
 
 
 # Converts RLE format to polygon segmentation for object detection and keypoints
@@ -73,21 +78,25 @@ def dict_setter(list_of_dicts):
     return [j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]]
 
 
-# image getter
-def get_image(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
+def replace_colors(image, image_name, r1, g1, b1, r2, b2, g2):
+    # image_name = image_name.replace('.jpg', '__modified.png')
+    image_data = np.array(image)
+    red, green, blue = image_data[:,:,0], image_data[:,:,1], image_data[:,:,2]
+    image_mask = (red == r1) & (green == g1) & (blue == b1)
+    image_data[:,:,:3][image_mask] = [r2, g2, b2]
+    image = Image.fromarray(image_data)
+    image.save(os.path.join(main_dir, image_name))
+    print(image)
 
 
 """download images"""
-for i in range(len(json_data['images'])):
-    image_downloader(json_data['images'][i]['coco_url'])
+# for i in range(len(json_data['images'])):
+#     image_downloader(json_data['images'][i]['coco_url'])
 
 
 """classes"""
 for c in range(len(json_data['categories'])):
-    colors = color_generator(len(json_data['categories']))
+    colors = blue_color_generator(len(json_data['categories']))
     for class_color in colors:
         classes_dict = {'name': json_data['categories'][c]['name'], 'id': json_data['categories'][c]['id'],
                         'color': colors[c], 'attribute_groups': []}
@@ -139,30 +148,34 @@ if str(coco_json_file).__contains__('instances'):
 """ panoptic """
 if str(coco_json_file).__contains__('panoptic'):
 
-    for img in json_data['images']:
-        colors, pixel_count = extcolors.extract(os.path.join(main_dir, img['file_name'].replace('jpg', 'png')))
-        print(colors)
-
-    # pan_loader = []
-    # for annot in json_data['annotations']:
-    #     for cat in json_data['categories']:
-    #         for si in annot['segments_info']:
-    #             segment_colors = color_generator(len(annot['segments_info']))
-    #             if cat['id'] == si['category_id']:
-    #                 sa_dict = {'classId': cat['id'], 'probability': 100, 'visible': True, 'attributes': [], 'parts': [],
-    #                            'attributeNames': [], 'imageId': annot['image_id']}
-    #
-    #                 pan_loader.append((sa_dict['imageId'], sa_dict))
-    #
-    # print(pan_loader, '\n')
-    #
     # for img in json_data['images']:
-    #     f_loader = []
-    #     for img_id, img_data in pan_loader:
-    #         if img['id'] == img_id:
-    #             f_loader.append(img_data)
-    #             with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
-    #                 json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
+    #     im = Image.open(os.path.join(main_dir, img['file_name'].replace('jpg', 'png')))
+    #     by_color = defaultdict(int)
+    #     for pixel in im.getdata():
+    #         by_color[pixel] += 1
+    #     mask_colors = list(by_color)
+    #     for blue in blue_color_generator(len(mask_colors)):
+    #         blue_color = hex_to_rgb(blue)
+    #         replace_colors(im, img['file_name'].replace('.jpg', '__modified.png'), mask_colors[0], mask_colors[1], mask_colors[2], blue_color[0], blue_color[1], blue_color[2])
+
+    pan_loader = []
+    for annot in json_data['annotations']:
+        for cat in json_data['categories']:
+            for si in annot['segments_info']:
+                segment_colors = blue_color_generator(len(annot['segments_info']))
+                if cat['id'] == si['category_id']:
+                    sa_dict = {'classId': cat['id'], 'probability': 100, 'visible': True, 'attributes': [], 'parts': [],
+                               'attributeNames': [], 'imageId': annot['image_id']}
+
+                    pan_loader.append((sa_dict['imageId'], sa_dict))
+
+    for img in json_data['images']:
+        f_loader = []
+        for img_id, img_data in pan_loader:
+            if img['id'] == img_id:
+                f_loader.append(img_data)
+                with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
+                    json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
 
 """ keypoints """
 if str(coco_json_file).__contains__('keypoints'):
@@ -232,13 +245,11 @@ if str(coco_json_file).__contains__('keypoints'):
                                             {'id': loader_point_data[1], 'x': loader_point_data[2],
                                              'y': loader_point_data[3]})
 
-                                        print(sa_template['pointLabels'])
-
                             for skeleton in cat['skeleton']:
                                 if loader_img_id == img_id and loader_point_data[0] == sa_template['groupId']\
                                         and skeleton[0] in img_kps and skeleton[1] in img_kps:
                                     sa_template['connections'].append({'id': 1, 'from': skeleton[0], 'to': skeleton[1]})
-                                    print(skeleton, skeleton[0], skeleton[1])
+
                 sa_template['points'] = dict_setter(sa_template['points'])
                 sa_template['connections'] = dict_setter(sa_template['connections'])
 

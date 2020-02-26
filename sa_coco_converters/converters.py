@@ -17,6 +17,7 @@ This may look over-engineered at this point however the idea is the following:
 '''
 from .cococonverters.CoCoStrategies import ObjectDetectionStrategy, KeypointDetectionStrategy, PanopticConverterStrategy
 
+
 class Converter(object):
     def __init__(self, project_type, task, dataset_name, export_root):
         self._select_strategy(project_type, task, dataset_name, export_root)
@@ -27,12 +28,18 @@ class Converter(object):
     def __set_strategy(self, c_strategy):
         self.strategy = c_strategy
 
-    def _select_strategy(self,project_type, task, dataset_name, export_root):
+    def _select_strategy(self, project_type, task, dataset_name, export_root):
         if task == 'instance_segmentation':
-            c_strategy = ObjectDetectionStrategy(dataset_name, export_root, project_type)
+            c_strategy = ObjectDetectionStrategy(
+                dataset_name, export_root, project_type
+            )
         if task == 'keypoint_detection':
-            c_strategy = KeypointDetectionStrategy(dataset_name, export_root, project_type)
+            c_strategy = KeypointDetectionStrategy(
+                dataset_name, export_root, project_type
+            )
         if task == 'panoptic_segmentation':
-            c_strategy = PanopticConverterStrategy(dataset_name, export_root, project_type)
+            c_strategy = PanopticConverterStrategy(
+                dataset_name, export_root, project_type
+            )
 
         self.__set_strategy(c_strategy)

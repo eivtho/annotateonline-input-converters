@@ -1,299 +1,136 @@
-import os
-import glob
-import json
-import argparse
-
-from tqdm import tqdm
-
+from sa_coco_converters.converters import Converter
+import sys, os
 import numpy as np
-
-from PIL import Image
-from pycocotools import mask as cocomask
-from panopticapi.utils import IdGenerator, id2rgb
-
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--sa_pixel_dataset",
-    type=str,
-    required=False,
-    help="Argument must be JSON file"
-)
-parser.add_argument(
-    "--sa_vector_dataset",
-    type=str,
-    required=False,
-    help="Argument must be JSON file"
-)
-parser.add_argument(
-    '--thing_ids',
-    nargs='+',
-    help='Thing IDs for pixel (panoptic) segmentation.',
-    required=False
-)
-
-parser.add_argument(
-    '--export_root',
-    type=str,
-    help='Thing IDs for pixel (panoptic) segmentation.',
-    required=False
-)
-args = parser.parse_args()
-
-if args.sa_vector_dataset:
-    sa_vector_to_coco_instances(args.sa_vector_dataset, args.export_root)
-elif args.sa_pixel_dataset:
-    thing_ids = map(int, args.thing_ids.split())
-    sa_pixel_to_coco_panoptic(
-        args.sa_pixel_dataset, thing_ids, args.export_root
-    )
+from argparse import ArgumentParser
+import glob
+import shutil
+import json
+ALLOWED_TASK_TYPES = ['panoptic_segmentation', 'instance_segmentation', 'keypoint_detection']
+ALLOWED_PROJECT_TYPES = ['pixel', 'vector']
+ALLOWED_CONVERSIONS = [('pixel', 'panoptic_segmentation'), ('pixel', 'instance_segmentation'), ('vector', 'instance_segmentation'), ('vector', 'keypoint_detection')]
 
 
-def sa_pixel_to_coco_panoptic(dataset_name, export_root, thing_ids):
-    os.makedirs(os.path.join(dataset_name, "annotations"), exist_ok=True)
+def passes_sanity_checks(args):
 
-    info = {
-        'description':
-            'This is stable 1.0 version of the ' + dataset_name + ' dataset.',
-        'url':
-            'https://superannotate.ai',
-        'version':
-            '1.0',
-        'year':
-            2019,
-        'contributor':
-            'Annotator LLC',
-        'date_created':
-            '2019-11-15 11:47:32.67823'
-    }
-
-    licences = [
-        {
-            'url': 'https://superannotate.ai',
-            'id': 1,
-            'name': 'Superannotate License'
-        }
-    ]
-
-    categories = []
-    dbid_to_catid = {}
-    classes = json.load(
-        open(os.path.join(export_root, "classes", "classes.json"))
-    )
-    for idx, dbclass in enumerate(classes, 1):
-        category = {
-            "id": idx,
-            "name": dbclass["name"],
-            "supercategory": dbclass["name"],
-            "isthing": dbclass["id"] in thing_ids,
-            "color": id2rgb(int(dbclass["color"][1:], 16))
-        }
-
-        dbid_to_catid[dbclass["id"]] = category["id"]
-        categories.append(category)
-
-    print("Converting annotations for {} dataset ...".format(dataset_name))
-
-    id_generator = IdGenerator({cat['id']: cat for cat in categories})
-    panoptic_root = os.path.join(
-        dataset_name, "panoptic_{}".format(dataset_name)
-    )
-    os.makedirs(panoptic_root, exist_ok=True)
-    jsons = glob.glob(os.path.join(export_root, "*.json"))
-    images = []
-    annotations = []
-    for idx, filepath in tqdm(enumerate(jsons, 1)):
-        filename = os.path.basename(filepath)
-        imagename = filename[:-len('___pixel.json')] + '___lores.jpg'
-
-        width, height = Image.open(os.path.join(export_root, imagename)).size
-        image_info = {
-            "id": idx,
-            "file_name": imagename,
-            "height": height,
-            "width": width,
-            "license": 1
-        }
-        images.append(image_info)
-
-        segments_info = []
-        sa_ann_json = json.load(open(os.path.join(export_root, filename)))
-
-        sa_bluemask_path = os.path.join(
-            export_root, filename[:-len('___pixel.json')] + '___save.png'
-        )
-        sa_bluemask_rgb = np.asarray(
-            Image.open(sa_bluemask_path).convert('RGB'), dtype=np.uint32
-        )
-        ann_mask = np.zeros((height, width), dtype=np.uint32)
-        flat_mask = (sa_bluemask_rgb[:, :, 0] <<
-                     16) | (sa_bluemask_rgb[:, :, 1] <<
-                            8) | (sa_bluemask_rgb[:, :, 2])
-
-        for instance in sa_ann_json:
-            parts = [int(part["color"][1:], 16) for part in instance["parts"]]
-            category_id = dbid_to_catid[instance["classId"]]
-            instance_bitmask = np.isin(flat_mask, parts)
-            segment_id = id_generator.get_id(category_id)
-            ann_mask[instance_bitmask] = segment_id
-            coco_instance_mask = cocomask.encode(
-                np.asfortranarray(instance_bitmask)
-            )
-            bbox = cocomask.toBbox(coco_instance_mask).tolist()
-            area = int(cocomask.area(coco_instance_mask))
-
-            segment_info = {
-                "id": segment_id,
-                "category_id": category_id,
-                "area": area,
-                "bbox": bbox,
-                "iscrowd": 0
-            }
-            segments_info.append(segment_info)
-        panopticmask = imagename[:-len("jpg")] + "png"
-        Image.fromarray(id2rgb(ann_mask)).save(
-            os.path.join(panoptic_root, panopticmask)
-        )
-
-        annotation = {
-            "image_id": idx,
-            "file_name": panopticmask,
-            "segments_info": segments_info
-        }
-        annotations.append(annotation)
-
-    panoptic_data = {
-        "info": info,
-        "licences": licences,
-        "images": images,
-        "annotations": annotations,
-        "categories": categories
-    }
-
-    json_data = json.dumps(panoptic_data, indent=4)
-    with open(
-        os.path.join(
-            dataset_name, "annotations",
-            "panoptic_{}.json".format(dataset_name)
-        ), "w+"
-    ) as coco_json:
-        coco_json.write(json_data)
+    if args.train_val_split_ratio < 0 or args.train_val_split_ratio > 100:
+        print("The split percentage should be in range (0,100), a number x will mean\
+        to put x percent of input images in train set, and the rest in validation set")
+        return False
+    if args.project_type not in ALLOWED_PROJECT_TYPES:
+        print('Please enter valid project type: pixel or vector')
+        return False
+    if args.task not in ALLOWED_TASK_TYPES:
+        print('Please enter valid task: instance_segmentation, panoptic_segmentation, keypoint_detection')
+        return False
+    tp = (args.project_type, args.task)
+    if tp not in ALLOWED_CONVERSIONS:
+        print('Converting from project type {} to coco format for the task {} is not supported'.format(args.project_type, args.task))
+        return False
+    return True
 
 
-def sa_vector_to_coco_instances(dataset_name, export_root):
-    os.makedirs(os.path.join(dataset_name, "annotations"), exist_ok=True)
+def parse_args():
+    argument_parser = ArgumentParser()
 
-    info = {
-        'description':
-            'This is stable 1.0 version of the ' + dataset_name + ' dataset.',
-        'url':
-            'https://superannotate.ai',
-        'version':
-            '1.0',
-        'year':
-            2019,
-        'contributor':
-            'Annotator LLC',
-        'date_created':
-            '2019-11-15 11:47:32.67823'
-    }
+    argument_parser.add_argument('-is', '--input_images_source', help = "The folder where images and thei \
+                                    corresponding annotation json files are located", type = str)
 
-    licences = [
-        {
-            'url': 'https://superannotate.ai',
-            'id': 1,
-            'name': 'Superannotate License'
-        }
-    ]
+    argument_parser.add_argument('-sr', '--train_val_split_ratio', help = "What percentage of input images should be in train set", type = int)
 
-    cocotype = "instances"
+    argument_parser.add_argument('-ptype', '--project_type', help = "The type of the annotate.online project can be vector or pixel", type = str )
 
-    categories = []
-    dbid_to_catid = {}
-    classes = json.load(
-        open(os.path.join(export_root, "classes", "classes.json"))
-    )
-    for idx, dbclass in enumerate(classes, 1):
-        category = {
-            "id": idx,
-            "name": dbclass["name"],
-            "supercategory": dbclass["name"],
-        }
+    argument_parser.add_argument('-t', '--task', help = "The output format of the converted file, this corresponds to one of 5 coco tasks", type = str)
 
-        dbid_to_catid[dbclass["id"]] = category["id"]
-        categories.append(category)
+    argument_parser.add_argument('-dn', '--dataset_name', help = "The name of the dataset", type = str)
+    args = argument_parser.parse_args()
+    return args
 
-    print("Converting annotations for {} dataset ...".format(dataset_name))
+def load_files(path_to_imgs, ratio, task):
+    suffix = None
+    rm_len = None
+    if args.project_type == 'pixel':
+        suffix = '___pixel.json'
+    else:
+        suffix = '___objects.json'
 
-    jsons = glob.glob(os.path.join(export_root, "*.json"))
-    images = []
-    annotations = []
-    for idx, filepath in tqdm(enumerate(jsons, 1)):
-        filename = os.path.basename(filepath)
-        imagename = filename[:-len('___objects.json')] + '___lores.jpg'
+    rm_len = len('___lores.jpg')
 
-        width, height = Image.open(os.path.join(export_root, imagename)).size
-        image_info = {
-            "id": idx,
-            "file_name": imagename,
-            "height": height,
-            "width": width,
-            "license": 1
-        }
-        images.append(image_info)
+    all_files = None
+    if task == 'keypoint_detection':
+        all_files = np.array([(fname, fname[:-rm_len]+suffix) for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))])
+    else:
+        all_files = np.array([(fname, fname[:-rm_len]+suffix, fname[:-rm_len]+'___save.png') for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))])
+    num_train_vals = int(len(all_files)*(ratio/100))
 
-        sa_ann_json = json.load(open(os.path.join(export_root, filename)))
+    num_test_vals = len(all_files) - num_train_vals
 
-        grouped_polygons = {}
-        annotations_perimage = []
-        for instance in sa_ann_json:
-            if instance["type"] == "polygon":
-                group_id = instance["groupId"]
-                category_id = dbid_to_catid[instance["classId"]]
-                points = [round(point, 2) for point in instance['points']]
-                grouped_polygons.setdefault(group_id,
-                                            {}).setdefault(category_id,
-                                                           []).append(points)
+    train_indices = set(np.random.choice(range(len(all_files)), num_train_vals, replace=False))
 
-        for ann_idx, polygon_group in enumerate(
-            grouped_polygons.values(),
-            len(annotations) + 1
-        ):
-            for category_id, polygons in polygon_group.items():
-                try:
-                    masks = cocomask.frPyObjects(polygons, height, width)
-                    mask = cocomask.merge(masks)
-                    area = int(cocomask.area(mask))
-                    bbox = cocomask.toBbox(mask).tolist()
-                    annotation = {
-                        'segmentation': polygons,
-                        'area': area,
-                        'iscrowd': 0,
-                        'image_id': idx,
-                        'bbox': bbox,
-                        'category_id': category_id,
-                        'id': ann_idx
-                    }
-                    annotations_perimage.append(annotation)
-                except Exception as bb_ex:
-                    print(filename, bb_ex)
-                    continue
+    all_indices = set(range(len(all_files)))
 
-        annotations += annotations_perimage
+    test_indices = all_indices.difference(train_indices)
+    test_set = all_files[np.array(list(test_indices ))]
+    train_set = all_files[np.array(list(train_indices))]
 
-    instances_data = {
-        "info": info,
-        "type": cocotype,
-        "licences": licences,
-        "images": images,
-        "annotations": annotations,
-        "categories": categories
-    }
+    return (train_set, test_set)
 
-    json_data = json.dumps(instances_data, indent=4)
-    with open(
-        os.path.join(
-            dataset_name, "annotations",
-            "instances_{}.json".format(dataset_name)
-        ), "w+"
-    ) as coco_json:
-        coco_json.write(json_data)
+
+def move_files(train_set, test_set, src):
+    train_path = os.path.join(src, 'train_set')
+    test_path = os.path.join(src,'test_set')
+
+    for tup in train_set:
+        for i in tup:
+            shutil.move( i,os.path.join(train_path, i.split('/')[-1]))
+    for tup in test_set:
+       for i in tup:
+           shutil.move( i, os.path.join(test_path, i.split('/')[-1]))
+
+
+def create_classes_mapper(imgs,classes_json):
+    classes = {}
+
+
+    j_data = json.load(open(classes_json))
+    for instance in j_data:
+        if 'classId' not in instance:
+            continue
+        classes[instance['className']] = instance['classId']
+
+    with open(os.path.join(imgs, 'test_set','classes_mapper.json'),'w') as fp:
+        json.dump(classes, fp)
+
+    with open(os.path.join(imgs, 'train_set','classes_mapper.json'),'w') as fp:
+        json.dump(classes, fp)
+
+
+
+
+if __name__ == '__main__':
+    args = parse_args()
+
+    if not passes_sanity_checks(args):
+        sys.exit()
+
+    try:
+        os.makedirs(os.path.join(args.input_images_source, 'train_set'))
+        os.makedirs(os.path.join(args.input_images_source, 'test_set'))
+    except Exception as e:
+        print ('could not make test and train set paths, check if they already exist')
+        sys.exit()
+
+    if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':
+        create_classes_mapper(args.input_images_source,os.path.join(args.input_images_source, 'classes.json'))
+
+
+    train_set, test_set = load_files(args.input_images_source, args.train_val_split_ratio, args.task)
+    move_files(train_set, test_set, args.input_images_source)
+
+
+    converter = Converter(args.project_type, args.task, args.dataset_name, os.path.join(args.input_images_source, 'train_set'))
+    converter.strategy.set_dataset_name(args.dataset_name + '_train')
+    converter.convert_from_sa()
+    converter.strategy.set_dataset_name(args.dataset_name + '_test')
+    converter.strategy.set_export_root(os.path.join(args.input_images_source, 'test_set'))
+    converter.convert_from_sa()
+

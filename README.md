@@ -1,34 +1,19 @@
 # Python conversion scripts between annotate.online format and other common formats.
 
+## Installation
+
+Run `bash install.sh`. This adds python virtualenv "venv_sa_conv" and
+installs required packages.
+
 ## Usage
+
+You need to activate python virtualenv with `source venv_sa_conv/bin/activate` beforehand.
 
 ### *From* COCO output *to* annotate.online input format
 
     python3 coco_to_sa.py --coco-json <input_coco_json>
 
 ### *From* annotate.online output *to* COCO input format
-
-#### Panoptic annotation:
-
-    python3 sa_to_coco.py --sa_pixel_dataset <input_sa_json> --thing_ids < e.g., "1 2 5"> --export_root <export_path>
-
-#### Vector annotation:
-
-    python3 sa_to_coco.py --sa_vector_dataset <input_sa_json> --export_root <export_path>
-
-### *From* LabelBox output *to* annotate.online input format
-
-    python3 labelbox_to_sa.py --lb_json <input_labelbox_json>
-
-
-## Installation
-
-Run `bash install.sh`. This adds python virtualenv "sa_input_converters" and
-installs required packages.
-
-
-
-## Converting from annotate.online to coco formats
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
 ```
 python3 sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
@@ -53,7 +38,7 @@ python3 sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
 ```
 **IMPORTANT:** Running this command will restructure your source folder. It will create two folders with names "test_set" and "train_set" and move images correspondingly.
 
-### Panoptic Segmentation 
+#### Panoptic Segmentation 
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_segmentation -dn [dataset_name]
 ```
@@ -62,7 +47,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 **Note**: You should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
 
-### Instance Segmentation
+#### Instance Segmentation
 
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name]
@@ -71,7 +56,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] 
 **Note**: if your project is of type 'pixel' you should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder. 
 If your project is of type  'vector' then you will need all your images their corresponding `lores.jpg`, `objects.json` and `classes.json` files in the same folder
 
-### Keypoint detection
+#### Keypoint detection
 
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint_detection -dn [dataset_name]
@@ -81,4 +66,8 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 
 **Note**: You should have all your images their coresponing `objects.json` files in one folder as well as the `classes.json` file in the same folder. 
 
+
+### *From* LabelBox output *to* annotate.online input format
+
+    python3 labelbox_to_sa.py --lb_json <input_labelbox_json>
 

@@ -60,10 +60,10 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *please note*: conversion to coco dataset format for panoptic segmentation task is only supported for projects of type pixel in annotate.online
 
-```
 **Note**: You should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
 
 ### Instance Segmentation
+
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name]
 ```

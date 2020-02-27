@@ -13,14 +13,19 @@ You need to activate python virtualenv with `source venv_sa_conv/bin/activate` b
 
     python3 coco_to_sa.py --coco-json <input_coco_json>
 
+### *From* LabelBox output *to* annotate.online input format
+
+    python3 labelbox_to_sa.py --lb_json <input_labelbox_json>
+
 ### *From* annotate.online output *to* COCO input format
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
 ```
-python3 sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
-                         [-sr TRAIN_VAL_SPLIT_RATIO] [-ptype PROJECT_TYPE]
-                         [-t TASK] [-dn DATASET_NAME]
-``` 
+usage: sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
+                     [-sr TRAIN_VAL_SPLIT_RATIO] [-ptype PROJECT_TYPE]
+                     [-t TASK] [-dn DATASET_NAME] [-od OUTPUT_DIR] [-cp COPYQ]
 ```
+```
+optional arguments:
   -h, --help            show this help message and exit
   -is INPUT_IMAGES_SOURCE, --input_images_source INPUT_IMAGES_SOURCE
                         The folder where images and thei corresponding
@@ -34,13 +39,19 @@ python3 sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
                         corresponds to one of 5 coco tasks
   -dn DATASET_NAME, --dataset_name DATASET_NAME
                         The name of the dataset
+  -od OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        The output folder for the coco json files test/train
+                        images
+  -cp COPYQ, --copyQ COPYQ
+                        Move or copy source images to corresponding test and
+                        train folders possible values are True or False. True copies the files
+``````
 
-```
-**IMPORTANT:** Running this command will restructure your source folder. It will create two folders with names "test_set" and "train_set" and move images correspondingly.
+**IMPORTANT:** Running this command will move or copy images from source folder. It will create two folders with names "test_set" and "train_set" and move images correspondingly.
 
 #### Panoptic Segmentation 
 ```
-python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_segmentation -dn [dataset_name]
+python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_segmentation -dn [dataset_name] -od [output_directory] -cp [copyQ]
 ```
 
 *please note*: conversion to coco dataset format for panoptic segmentation task is only supported for projects of type pixel in annotate.online
@@ -50,7 +61,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 #### Instance Segmentation
 
 ```
-python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name]
+python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name] -od [output_directory] -cp [copyQ]
 ```
 
 **Note**: if your project is of type 'pixel' you should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder. 
@@ -59,7 +70,7 @@ If your project is of type  'vector' then you will need all your images their co
 #### Keypoint detection
 
 ```
-python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint_detection -dn [dataset_name]
+python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint_detection -dn [dataset_name] -od [output_directory] -cp [copyQ] -od [output_directory] -cp [copyQ]
 ```
 
 *please note*: conversion to coco dataset format for keypoint detection task is only supported for projects of type 'vector' in annotate.online. Furthermore each template should fully describe an object. 
@@ -67,7 +78,4 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 **Note**: You should have all your images their coresponing `objects.json` files in one folder as well as the `classes.json` file in the same folder. 
 
 
-### *From* LabelBox output *to* annotate.online input format
-
-    python3 labelbox_to_sa.py --lb_json <input_labelbox_json>
 

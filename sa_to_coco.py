@@ -79,9 +79,20 @@ def parse_args():
         '-dn', '--dataset_name', help="The name of the dataset", type=str
     )
 
-    argument_parser.add_argument('-od', '--output_dir', help = "The output folder for the coco json files test/train images", type = str)
+    argument_parser.add_argument(
+        '-od',
+        '--output_dir',
+        help="The output folder for the coco json files test/train images",
+        type=str
+    )
 
-    argument_parser.add_argument('-cp', '--copyQ', help = "Move or copy source images to corresponding test and train folders", type = bool)
+    argument_parser.add_argument(
+        '-cp',
+        '--copyQ',
+        help=
+        "Move or copy source images to corresponding test and train folders",
+        type=bool
+    )
 
     args = argument_parser.parse_args()
     return args
@@ -140,10 +151,14 @@ def move_files(train_set, test_set, src, cp):
 
     if cp:
         move_fn = shutil.copy
-        logging.warning('Source image files will be copied to output_dir/test and output_dir/train folders')
+        logging.warning(
+            'Source image files will be copied to output_dir/test and output_dir/train folders'
+        )
     else:
         move_fn = shutil.move
-        logging.warning('Source image files will be moved to output_dir/test and output_dir/train folders')
+        logging.warning(
+            'Source image files will be moved to output_dir/test and output_dir/train folders'
+        )
 
     for tup in train_set:
         for i in tup:
@@ -198,7 +213,8 @@ if __name__ == '__main__':
     )
     move_files(train_set, test_set, args.output_dir, args.copyQ)
     converter = Converter(
-        args.project_type, args.task, args.dataset_name, os.path.join(args.output_dir, 'train_set'),args.output_dir
+        args.project_type, args.task, args.dataset_name,
+        os.path.join(args.output_dir, 'train_set'), args.output_dir
     )
 
     converter.strategy.set_dataset_name(args.dataset_name + '_train')
@@ -217,6 +233,8 @@ if __name__ == '__main__':
     try:
         converter.convert_from_sa()
     except Exception as e:
-        logging.error('Something went wrong while converting the validation set')
+        logging.error(
+            'Something went wrong while converting the validation set'
+        )
         logging.error(e)
         sys.exit()

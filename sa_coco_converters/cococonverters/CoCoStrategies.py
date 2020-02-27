@@ -14,8 +14,8 @@ from .SaVectorToCoco import sa_vector_to_coco_instance_segmentation, sa_vector_t
 class PanopticConverterStrategy(CoCoConverter):
     name = "Panoptic converter"
 
-    def __init__(self, dataset_name, export_root, project_type):
-        super().__init__(dataset_name, export_root, project_type)
+    def __init__(self, dataset_name, export_root, project_type, output_dir):
+        super().__init__(dataset_name, export_root, project_type, output_dir)
         self.__set_conversion_algorithm()
 
     def __set_conversion_algorithm(self):
@@ -46,8 +46,6 @@ class PanopticConverterStrategy(CoCoConverter):
             self.dataset_name, "panoptic_{}".format(self.dataset_name)
         )
 
-        os.makedirs(panoptic_root, exist_ok=True)
-
         images = []
         annotations = []
         id_generator = self._make_id_generator()
@@ -74,22 +72,19 @@ class PanopticConverterStrategy(CoCoConverter):
         out_json['annotations'] = annotations
         out_json['images'] = images
         json_data = json.dumps(out_json, indent=4)
-
         with open(
-            os.path.join(
-                './', self.dataset_name, 'panoptic_{}'.format(
-                    self.dataset_name
-                ), "panoptic_{}.json".format(self.dataset_name)
-            ), "w+"
+            os.path.join(self.output_dir, '{}.json'.format(self.dataset_name)),
+            'w+'
         ) as coco_json:
+
             coco_json.write(json_data)
 
 
 class ObjectDetectionStrategy(CoCoConverter):
     name = "ObjectDetection converter"
 
-    def __init__(self, dataset_name, export_root, project_type):
-        super().__init__(dataset_name, export_root, project_type)
+    def __init__(self, dataset_name, export_root, project_type, output_dir):
+        super().__init__(dataset_name, export_root, project_type, output_dir)
         self.__setup_conversion_algorithm()
 
     def __setup_conversion_algorithm(self):
@@ -136,10 +131,6 @@ class ObjectDetectionStrategy(CoCoConverter):
         images = []
         annotations = []
         id_generator = self._make_id_generator()
-        object_detection_root = os.path.join(
-            self.dataset_name, 'obj_det_{}'.format(self.dataset_name)
-        )
-        os.makedirs(object_detection_root, exist_ok=True)
 
         for id_, json_ in tqdm(enumerate(jsons)):
             try:
@@ -153,12 +144,9 @@ class ObjectDetectionStrategy(CoCoConverter):
         out_json['images'] = images
 
         json_data = json.dumps(out_json, indent=4)
-
         with open(
-            os.path.join(
-                './', self.dataset_name, 'obj_det_{}'.format(self.dataset_name),
-                'obj_det_{}.json'.format(self.dataset_name)
-            ), 'w+'
+            os.path.join(self.output_dir, '{}.json'.format(self.dataset_name)),
+            'w+'
         ) as coco_json:
             coco_json.write(json_data)
 
@@ -168,8 +156,8 @@ class ObjectDetectionStrategy(CoCoConverter):
 class KeypointDetectionStrategy(CoCoConverter):
     name = 'Keypoint Detection Converter'
 
-    def __init__(self, dataset_name, export_root, project_type):
-        super().__init__(dataset_name, export_root, project_type)
+    def __init__(self, dataset_name, export_root, project_type, output_dir):
+        super().__init__(dataset_name, export_root, project_type, output_dir)
         self.__setup_conversion_algorithm()
 
     def __str__(self):
@@ -189,7 +177,7 @@ class KeypointDetectionStrategy(CoCoConverter):
         img_width, img_height = Image.open(image_path).size
         image_info = {
             'id': id_,
-            'file_name': image_path,
+            'file_name': image_path[len('output') + 1:],
             'height': img_height,
             'width': img_width,
             'license': 1
@@ -203,11 +191,6 @@ class KeypointDetectionStrategy(CoCoConverter):
 
         images = []
         annotations = []
-        print(self.export_root)
-        key_detection_root = os.path.join(
-            self.dataset_name, 'key_det_{}'.format(self.dataset_name)
-        )
-        os.makedirs(key_detection_root, exist_ok=True)
 
         id_generator = self._make_id_generator()
         id_generator_anno = self._make_id_generator()
@@ -223,10 +206,8 @@ class KeypointDetectionStrategy(CoCoConverter):
         json_data = json.dumps(out_json, indent=4)
 
         with open(
-            os.path.join(
-                './', self.dataset_name, 'key_det_{}'.format(self.dataset_name),
-                'key_det_{}.json'.format(self.dataset_name)
-            ), 'w+'
+            os.path.join(self.output_dir, '{}.json'.format(self.dataset_name)),
+            'w+'
         ) as coco_json:
             coco_json.write(json_data)
 

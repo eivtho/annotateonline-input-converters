@@ -19,8 +19,12 @@ from .cococonverters.CoCoStrategies import ObjectDetectionStrategy, KeypointDete
 
 
 class Converter(object):
-    def __init__(self, project_type, task, dataset_name, export_root):
-        self._select_strategy(project_type, task, dataset_name, export_root)
+    def __init__(
+        self, project_type, task, dataset_name, export_root, output_dir
+    ):
+        self._select_strategy(
+            project_type, task, dataset_name, export_root, output_dir
+        )
 
     def convert_from_sa(self):
         self.strategy.sa_to_output_format()
@@ -28,18 +32,20 @@ class Converter(object):
     def __set_strategy(self, c_strategy):
         self.strategy = c_strategy
 
-    def _select_strategy(self, project_type, task, dataset_name, export_root):
+    def _select_strategy(
+        self, project_type, task, dataset_name, export_root, output_dir
+    ):
         if task == 'instance_segmentation':
             c_strategy = ObjectDetectionStrategy(
-                dataset_name, export_root, project_type
+                dataset_name, export_root, project_type, output_dir
             )
         if task == 'keypoint_detection':
             c_strategy = KeypointDetectionStrategy(
-                dataset_name, export_root, project_type
+                dataset_name, export_root, project_type, output_dir
             )
         if task == 'panoptic_segmentation':
             c_strategy = PanopticConverterStrategy(
-                dataset_name, export_root, project_type
+                dataset_name, export_root, project_type, output_dir
             )
 
         self.__set_strategy(c_strategy)

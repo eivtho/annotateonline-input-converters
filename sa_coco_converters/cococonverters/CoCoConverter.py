@@ -9,10 +9,11 @@ from PIL import Image
 
 
 class CoCoConverter(object):
-    def __init__(self, dataset_name_, export_root_, project_type_):
+    def __init__(self, dataset_name_, export_root_, project_type_, output_dir_):
         self.project_type = project_type_
         self.dataset_name = dataset_name_
         self.export_root = export_root_
+        self.output_dir = output_dir_
 
     def _create_single_category(self, item):
         category = {
@@ -129,7 +130,7 @@ class CoCoConverter(object):
         img_width, img_height = Image.open(image_path).size
         image_info = {
             'id': id_,
-            'file_name': image_path,
+            'file_name': image_path[len(self.output_dir) + 1:],
             'height': img_height,
             'width': img_width,
             'license': 1

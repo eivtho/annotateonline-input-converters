@@ -125,7 +125,7 @@ class CoCoConverter(object):
         elif source_type == 'vector':
             rm_len = len('___objects.json')
 
-        image_path = json_path[:-rm_len] + '___lores.jpg'
+        image_path = json_path[:-rm_len]
 
         img_width, img_height = Image.open(image_path).size
         image_info = {

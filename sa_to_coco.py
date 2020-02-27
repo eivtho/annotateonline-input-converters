@@ -106,13 +106,12 @@ def load_files(path_to_imgs, ratio, task):
     else:
         suffix = '___objects.json'
 
-    rm_len = len('___lores.jpg')
 
     all_files = None
     if task == 'keypoint_detection':
         all_files = np.array(
             [
-                (fname, fname[:-rm_len] + suffix)
+                (fname, fname + suffix)
                 for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
             ]
         )
@@ -120,8 +119,8 @@ def load_files(path_to_imgs, ratio, task):
         all_files = np.array(
             [
                 (
-                    fname, fname[:-rm_len] + suffix,
-                    fname[:-rm_len] + '___save.png'
+                    fname, fname + suffix,
+                    fname + '___save.png'
                 ) for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
             ]
         )
@@ -174,9 +173,9 @@ def create_classes_mapper(imgs, classes_json):
 
     j_data = json.load(open(classes_json))
     for instance in j_data:
-        if 'classId' not in instance:
+        if 'id' not in instance:
             continue
-        classes[instance['className']] = instance['classId']
+        classes[instance['name']] = instance['id']
 
     with open(os.path.join(imgs, 'test_set', 'classes_mapper.json'), 'w') as fp:
         json.dump(classes, fp)
@@ -205,7 +204,7 @@ if __name__ == '__main__':
     if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':
         create_classes_mapper(
             args.output_dir,
-            os.path.join(args.input_images_source, 'classes.json')
+            os.path.join(args.input_images_source, 'classes/classes.json')
         )
 
     train_set, test_set = load_files(

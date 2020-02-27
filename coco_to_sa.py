@@ -10,7 +10,9 @@ from pycocotools.coco import COCO
 from PIL import Image
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--coco-json", type=str, required=True, help="Argument must be JSON file")
+parser.add_argument(
+    "--coco-json", type=str, required=True, help="Argument must be JSON file"
+)
 p = parser.parse_args()
 
 coco_json = p.coco_json
@@ -43,16 +45,24 @@ def image_downloader(url):
 # Converts HEX values to RGB values
 def hex_to_rgb(hex_string):
     h = hex_string.lstrip('#')
-    return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
 # Generates blue colors in range(n)
 def blue_color_generator(n):
     hex_colors = []
     for i in range(n):
-        int_color = i*15
-        bgr_color = np.array([int_color & 255, (int_color >> 8) & 255, (int_color >> 16) & 255, 255], dtype=np.uint8)
-        hex_color = '#' + "{:02x}".format(bgr_color[2], 'x') + "{:02x}".format(bgr_color[1], 'x') + "{:02x}".format(bgr_color[0], 'x')
+        int_color = i * 15
+        bgr_color = np.array(
+            [
+                int_color & 255, (int_color >> 8) & 255,
+                (int_color >> 16) & 255, 255
+            ],
+            dtype=np.uint8
+        )
+        hex_color = '#' + "{:02x}".format(bgr_color[2], 'x') + "{:02x}".format(
+            bgr_color[1], 'x'
+        ) + "{:02x}".format(bgr_color[0], 'x')
         hex_colors.append(hex_color)
     return hex_colors
 
@@ -63,8 +73,10 @@ def rle_to_polygon(annotation):
     image_id = annotation["image_id"]
     image_info = coco.loadImgs([image_id])[0]
     binary_mask = coco.annToMask(annotation)
-    cv2.imwrite(image_info["file_name"], binary_mask*255)
-    contours, hierarchy = cv2.findContours(binary_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.imwrite(image_info["file_name"], binary_mask * 255)
+    contours, hierarchy = cv2.findContours(
+        binary_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
     segmentation = []
 
     for contour in contours:
@@ -82,41 +94,51 @@ def merge_tuples(list_of_tuples):
     mergeddict = defaultdict(list)
     for group in list_of_tuples:
         mergeddict[group[:-1]].append(group[-1])
-    return [(k + (tuple(v),) if len(v) > 1 else k + tuple(v)) for k, v in mergeddict.items()]
+    return [
+        (k + (tuple(v), ) if len(v) > 1 else k + tuple(v))
+        for k, v in mergeddict.items()
+    ]
 
 
 # Returns unique values of list. Values can be dicts or lists!
 def dict_setter(list_of_dicts):
-    return [j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]]
+    return [
+        j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]
+    ]
 
 
 def replace_colors(image, image_name, r1, g1, b1, r2, b2, g2):
     # image_name = image_name.replace('.jpg', '__modified.png')
     image_data = np.array(image)
-    red, green, blue = image_data[:,:,0], image_data[:,:,1], image_data[:,:,2]
+    red, green, blue = image_data[:, :, 0], image_data[:, :, 1
+                                                      ], image_data[:, :, 2]
     image_mask = (red == r1) & (green == g1) & (blue == b1)
-    image_data[:,:,:3][image_mask] = [r2, g2, b2]
+    image_data[:, :, :3][image_mask] = [r2, g2, b2]
     image = Image.fromarray(image_data)
     image.save(os.path.join(main_dir, image_name))
     print(image)
 
 
-"""download images"""
+# For that case if you need datasets original images
 # for i in range(len(json_data['images'])):
 #     image_downloader(json_data['images'][i]['coco_url'])
 
-
-"""classes"""
+# Classes
 for c in range(len(json_data['categories'])):
     colors = blue_color_generator(len(json_data['categories']))
     for class_color in colors:
-        classes_dict = {'name': json_data['categories'][c]['name'], 'id': json_data['categories'][c]['id'],
-                        'color': colors[c], 'attribute_groups': []}
+        classes_dict = {
+            'name': json_data['categories'][c]['name'],
+            'id': json_data['categories'][c]['id'],
+            'color': colors[c],
+            'attribute_groups': []
+        }
         classes_loader.append(classes_dict)
-res_list = [i for n, i in enumerate(classes_loader) if i not in classes_loader[n + 1:]]
+res_list = [
+    i for n, i in enumerate(classes_loader) if i not in classes_loader[n + 1:]
+]
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)
-
 
 # instances
 if 'instances' in str(coco_json_file):
@@ -125,22 +147,44 @@ if 'instances' in str(coco_json_file):
     for annot in json_data['annotations']:
         for cat in json_data['categories']:
             if annot['iscrowd'] == 1:
-                annot['segmentation'] = rle_to_polygon(annot)
+                try:
+                    annot['segmentation'] = rle_to_polygon(annot)
+                except IndexError:
+                    print("List index out of range")
             if cat['id'] == annot['category_id']:
-                sa_dict_bbox = {'type': 'bbox',
-                                'points': {'x1': annot['bbox'][0], 'y1': annot['bbox'][1],
-                                           'x2': annot['bbox'][0] + annot['bbox'][2],
-                                           'y2': annot['bbox'][1] + annot['bbox'][3]}, 'className': cat['name'],
-                                'classId': cat['id'],
-                                'attributes': [], 'probability': 100, 'locked': False, 'visible': True,
-                                'groupId': annot['id'], 'imageId': annot['image_id']}
+                sa_dict_bbox = {
+                    'type': 'bbox',
+                    'points':
+                        {
+                            'x1': annot['bbox'][0],
+                            'y1': annot['bbox'][1],
+                            'x2': annot['bbox'][0] + annot['bbox'][2],
+                            'y2': annot['bbox'][1] + annot['bbox'][3]
+                        },
+                    'className': cat['name'],
+                    'classId': cat['id'],
+                    'attributes': [],
+                    'probability': 100,
+                    'locked': False,
+                    'visible': True,
+                    'groupId': annot['id'],
+                    'imageId': annot['image_id']
+                }
 
                 sa_polygon_loader = [
-                    {'type': 'polygon', 'points': annot['segmentation'][p], 'className': cat['name'],
-                     'classId': cat['id'],
-                     'attributes': [], 'probability': 100, 'locked': False, 'visible': True,
-                     'groupId': annot['id'], 'imageId': annot['image_id']}
-                    for p in range(len(annot['segmentation']))]
+                    {
+                        'type': 'polygon',
+                        'points': annot['segmentation'][p],
+                        'className': cat['name'],
+                        'classId': cat['id'],
+                        'attributes': [],
+                        'probability': 100,
+                        'locked': False,
+                        'visible': True,
+                        'groupId': annot['id'],
+                        'imageId': annot['image_id']
+                    } for p in range(len(annot['segmentation']))
+                ]
 
                 for img in json_data['images']:
                     for polygon in sa_polygon_loader:
@@ -154,8 +198,19 @@ if 'instances' in str(coco_json_file):
         for img_id, img_data in loader:
             if img['id'] == img_id:
                 f_loader.append(img_data)
-                with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
-                    json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
+                with open(
+                    os.path.join(
+                        main_dir, img['file_name'] + "___objects.json"
+                    ), "w"
+                ) as new_json:
+                    json.dump(
+                        [
+                            i for n, i in enumerate(f_loader)
+                            if i not in f_loader[n + 1:]
+                        ],
+                        new_json,
+                        indent=2
+                    )
 
 # panoptic
 if 'panoptic' in str(coco_json_file):
@@ -174,10 +229,19 @@ if 'panoptic' in str(coco_json_file):
     for annot in json_data['annotations']:
         for cat in json_data['categories']:
             for si in annot['segments_info']:
-                segment_colors = blue_color_generator(len(annot['segments_info']))
+                segment_colors = blue_color_generator(
+                    len(annot['segments_info'])
+                )
                 if cat['id'] == si['category_id']:
-                    sa_dict = {'classId': cat['id'], 'probability': 100, 'visible': True, 'attributes': [], 'parts': [],
-                               'attributeNames': [], 'imageId': annot['image_id']}
+                    sa_dict = {
+                        'classId': cat['id'],
+                        'probability': 100,
+                        'visible': True,
+                        'attributes': [],
+                        'parts': [],
+                        'attributeNames': [],
+                        'imageId': annot['image_id']
+                    }
 
                     pan_loader.append((sa_dict['imageId'], sa_dict))
 
@@ -186,8 +250,19 @@ if 'panoptic' in str(coco_json_file):
         for img_id, img_data in pan_loader:
             if img['id'] == img_id:
                 f_loader.append(img_data)
-                with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
-                    json.dump([i for n, i in enumerate(f_loader) if i not in f_loader[n + 1:]], new_json, indent=2)
+                with open(
+                    os.path.join(
+                        main_dir, img['file_name'] + "___objects.json"
+                    ), "w"
+                ) as new_json:
+                    json.dump(
+                        [
+                            i for n, i in enumerate(f_loader)
+                            if i not in f_loader[n + 1:]
+                        ],
+                        new_json,
+                        indent=2
+                    )
 
 # keypoints
 if 'keypoints' in str(coco_json_file):
@@ -198,13 +273,26 @@ if 'keypoints' in str(coco_json_file):
     for annot in json_data['annotations']:
         kp_ids = []
         if int(annot['num_keypoints']) > 0:
-            kp_points = [item for index, item in enumerate(annot['keypoints']) if (index + 1) % 3 != 0]
-            kp_points = [(kp_points[i], kp_points[i + 1]) for i in range(0, len(kp_points), 2)]
+            kp_points = [
+                item for index, item in enumerate(annot['keypoints'])
+                if (index + 1) % 3 != 0
+            ]
+            kp_points = [
+                (kp_points[i], kp_points[i + 1])
+                for i in range(0, len(kp_points), 2)
+            ]
             kp_ids = merge_tuples(
-                [(annot['image_id'], annot['id'], kp_points.index(tup) + 1) for tup in kp_points if tup[0] != 0])
-            kp_points = [(annot['image_id'], (annot['id'], kp_points.index(tup) + 1, tup[0], tup[1])) for tup in
-                         kp_points if
-                         tup[0] != 0]
+                [
+                    (annot['image_id'], annot['id'], kp_points.index(tup) + 1)
+                    for tup in kp_points if tup[0] != 0
+                ]
+            )
+            kp_points = [
+                (
+                    annot['image_id'],
+                    (annot['id'], kp_points.index(tup) + 1, tup[0], tup[1])
+                ) for tup in kp_points if tup[0] != 0
+            ]
 
             for el in kp_points:
                 kp_point_loader.append(el)
@@ -223,16 +311,41 @@ if 'keypoints' in str(coco_json_file):
 
             if cat['id'] == annot['category_id']:
 
-                sa_dict_bbox = {'type': 'bbox', 'points': {'x1': annot['bbox'][0], 'y1': annot['bbox'][1],
-                                                           'x2': annot['bbox'][0] + annot['bbox'][2],
-                                                           'y2': annot['bbox'][1] + annot['bbox'][3]}, 'className': cat['name'],
-                                'classId': cat['id'], 'pointLabels': {}, 'attributes': [], 'probability': 100, 'locked': False,
-                                'visible': True, 'groupId': annot['id'], 'imageId': annot['image_id']}
+                sa_dict_bbox = {
+                    'type': 'bbox',
+                    'points':
+                        {
+                            'x1': annot['bbox'][0],
+                            'y1': annot['bbox'][1],
+                            'x2': annot['bbox'][0] + annot['bbox'][2],
+                            'y2': annot['bbox'][1] + annot['bbox'][3]
+                        },
+                    'className': cat['name'],
+                    'classId': cat['id'],
+                    'pointLabels': {},
+                    'attributes': [],
+                    'probability': 100,
+                    'locked': False,
+                    'visible': True,
+                    'groupId': annot['id'],
+                    'imageId': annot['image_id']
+                }
 
-                sa_polygon_loader = [{'type': 'polygon', 'points': annot['segmentation'][p], 'className': cat['name'],
-                                      'classId': cat['id'], 'pointLabels': {}, 'attributes': [], 'probability': 100,
-                                      'locked': False, 'visible': True, 'groupId': annot['id'], 'imageId': annot['image_id']}
-                                     for p in range(len(annot['segmentation']))]
+                sa_polygon_loader = [
+                    {
+                        'type': 'polygon',
+                        'points': annot['segmentation'][p],
+                        'className': cat['name'],
+                        'classId': cat['id'],
+                        'pointLabels': {},
+                        'attributes': [],
+                        'probability': 100,
+                        'locked': False,
+                        'visible': True,
+                        'groupId': annot['id'],
+                        'imageId': annot['image_id']
+                    } for p in range(len(annot['segmentation']))
+                ]
 
                 # sa_template = {'type': 'template', 'classId': cat['id'], 'probability': 100, 'points': [], 'connections': [],
                 #                'attributes': [], 'groupId': annot['id'], 'pointLabels': {}, 'locked': False, 'visible': True,
@@ -282,5 +395,7 @@ if 'keypoints' in str(coco_json_file):
         for img_id, img_data in kp_loader:
             if img['id'] == img_id:
                 f_loader.append(img_data)
-        with open(os.path.join(main_dir, img['file_name'] + "___objects.json"), "w") as new_json:
+        with open(
+            os.path.join(main_dir, img['file_name'] + "___objects.json"), "w"
+        ) as new_json:
             json.dump(dict_setter(f_loader), new_json, indent=2)

@@ -1,11 +1,15 @@
-from sa_coco_converters.converters import Converter
-import sys, os
-import numpy as np
+import sys
+import os
 from argparse import ArgumentParser
 import glob
 import shutil
 import json
 import logging
+
+import numpy as np
+
+from sa_coco_converters.converters import Converter
+
 ALLOWED_TASK_TYPES = [
     'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection'
 ]
@@ -34,7 +38,7 @@ def passes_sanity_checks(args):
         return False
     tp = (args.project_type, args.task)
     if tp not in ALLOWED_CONVERSIONS:
-        logging_error(
+        logging.error(
             'Converting from project type {} to coco format for the task {} is not supported'
             .format(args.project_type, args.task)
         )

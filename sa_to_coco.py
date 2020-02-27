@@ -239,5 +239,5 @@ if __name__ == '__main__':
         logging.error(
             'Something went wrong while converting the validation set'
         )
-        logging.error(e)
+        logging.error( e )
         sys.exit()

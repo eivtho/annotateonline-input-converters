@@ -52,14 +52,16 @@ def parse_args():
     argument_parser.add_argument(
         '-is',
         '--input_images_source',
-        help="The folder where images and thei \
-                                    corresponding annotation json files are located",
+        required=True,
+        help=
+        "The folder where images and their corresponding annotation json files are located",
         type=str
     )
 
     argument_parser.add_argument(
         '-sr',
         '--train_val_split_ratio',
+        required=True,
         help="What percentage of input images should be in train set",
         type=int
     )
@@ -67,6 +69,7 @@ def parse_args():
     argument_parser.add_argument(
         '-ptype',
         '--project_type',
+        required=True,
         help="The type of the annotate.online project can be vector or pixel",
         type=str
     )
@@ -74,18 +77,24 @@ def parse_args():
     argument_parser.add_argument(
         '-t',
         '--task',
+        required=True,
         help=
         "The output format of the converted file, this corresponds to one of 5 coco tasks",
         type=str
     )
 
     argument_parser.add_argument(
-        '-dn', '--dataset_name', help="The name of the dataset", type=str
+        '-dn',
+        '--dataset_name',
+        required=True,
+        help="The name of the dataset",
+        type=str
     )
 
     argument_parser.add_argument(
         '-od',
         '--output_dir',
+        required=True,
         help="The output folder for the coco json files test/train images",
         type=str
     )
@@ -93,6 +102,7 @@ def parse_args():
     argument_parser.add_argument(
         '-cp',
         '--copyQ',
+        required=True,
         help=
         "Move or copy source images to corresponding test and train folders",
         type=bool
@@ -104,7 +114,6 @@ def parse_args():
 
 def load_files(path_to_imgs, ratio, task):
     suffix = None
-    rm_len = None
     if args.project_type == 'pixel':
         suffix = '___pixel.json'
     else:

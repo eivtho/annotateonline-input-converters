@@ -7,7 +7,7 @@ import numpy as np
 
 from collections import defaultdict
 from pycocotools.coco import COCO
-from PIL import Image
+from panopticapi.utils import id2rgb
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -48,8 +48,13 @@ def hex_to_rgb(hex_string):
     return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
 
 
+# Converts RGB values to HEX values
+def rgb_to_hex(rgb_tuple):
+    return '#%02x%02x%02x' % rgb_tuple
+
+
 # Generates blue colors in range(n)
-def blue_color_generator(n):
+def blue_color_generator(n, hex_values=True):
     hex_colors = []
     for i in range(n):
         int_color = i * 15
@@ -63,17 +68,17 @@ def blue_color_generator(n):
         hex_color = '#' + "{:02x}".format(bgr_color[2], 'x') + "{:02x}".format(
             bgr_color[1], 'x'
         ) + "{:02x}".format(bgr_color[0], 'x')
-        hex_colors.append(hex_color)
+        if hex_values:
+            hex_colors.append(hex_color)
+        else:
+            hex_colors.append(hex_to_rgb(hex_color))
     return hex_colors
 
 
 # Converts RLE format to polygon segmentation for object detection and keypoints
 def rle_to_polygon(annotation):
     coco = COCO(coco_json)
-    image_id = annotation["image_id"]
-    image_info = coco.loadImgs([image_id])[0]
     binary_mask = coco.annToMask(annotation)
-    cv2.imwrite(image_info["file_name"], binary_mask * 255)
     contours, hierarchy = cv2.findContours(
         binary_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
     )
@@ -85,7 +90,6 @@ def rle_to_polygon(annotation):
             segmentation.append(contour)
         if len(segmentation) == 0:
             continue
-    print(len(segmentation))
     return segmentation
 
 
@@ -107,18 +111,6 @@ def dict_setter(list_of_dicts):
     ]
 
 
-def replace_colors(image, image_name, r1, g1, b1, r2, b2, g2):
-    # image_name = image_name.replace('.jpg', '__modified.png')
-    image_data = np.array(image)
-    red, green, blue = image_data[:, :, 0], image_data[:, :, 1
-                                                      ], image_data[:, :, 2]
-    image_mask = (red == r1) & (green == g1) & (blue == b1)
-    image_data[:, :, :3][image_mask] = [r2, g2, b2]
-    image = Image.fromarray(image_data)
-    image.save(os.path.join(main_dir, image_name))
-    print(image)
-
-
 # For that case if you need datasets original images
 # for i in range(len(json_data['images'])):
 #     image_downloader(json_data['images'][i]['coco_url'])
@@ -137,6 +129,7 @@ for c in range(len(json_data['categories'])):
 res_list = [
     i for n, i in enumerate(classes_loader) if i not in classes_loader[n + 1:]
 ]
+
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)
 
@@ -215,30 +208,20 @@ if 'instances' in str(coco_json_file):
 # panoptic
 if 'panoptic' in str(coco_json_file):
 
-    # for img in json_data['images']:
-    #     im = Image.open(os.path.join(main_dir, img['file_name'].replace('jpg', 'png')))
-    #     by_color = defaultdict(int)
-    #     for pixel in im.getdata():
-    #         by_color[pixel] += 1
-    #     mask_colors = list(by_color)
-    #     for blue in blue_color_generator(len(mask_colors)):
-    #         blue_color = hex_to_rgb(blue)
-    #         replace_colors(im, img['file_name'].replace('.jpg', '__modified.png'), mask_colors[0], mask_colors[1], mask_colors[2], blue_color[0], blue_color[1], blue_color[2])
-
     pan_loader = []
     for annot in json_data['annotations']:
         for cat in json_data['categories']:
             for si in annot['segments_info']:
-                segment_colors = blue_color_generator(
-                    len(annot['segments_info'])
-                )
+
                 if cat['id'] == si['category_id']:
                     sa_dict = {
                         'classId': cat['id'],
                         'probability': 100,
-                        'visible': True,
+                        'parts':
+                            [{
+                                'color': rgb_to_hex(tuple(id2rgb(si['id'])))
+                            }],
                         'attributes': [],
-                        'parts': [],
                         'attributeNames': [],
                         'imageId': annot['image_id']
                     }

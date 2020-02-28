@@ -111,6 +111,19 @@ def dict_setter(list_of_dicts):
     ]
 
 
+# For renaming png files
+def rename_png():
+    for root, dirs, files in os.walk(main_dir, topdown=False):
+        for file in files:
+            for image in json_data['images']:
+                if file.endswith('.png'
+                                ) and str(file)[:-3] == image['file_name'][:-3]:
+                    new_name = image['file_name'] + '___save.png'
+                    os.rename(
+                        os.path.join(root, file), os.path.join(root, new_name)
+                    )
+
+
 # For that case if you need datasets original images
 # for i in range(len(json_data['images'])):
 #     image_downloader(json_data['images'][i]['coco_url'])
@@ -207,7 +220,7 @@ if 'instances' in str(coco_json_file):
 
 # panoptic
 if 'panoptic' in str(coco_json_file):
-
+    rename_png()
     pan_loader = []
     for annot in json_data['annotations']:
         for cat in json_data['categories']:
@@ -234,9 +247,8 @@ if 'panoptic' in str(coco_json_file):
             if img['id'] == img_id:
                 f_loader.append(img_data)
                 with open(
-                    os.path.join(
-                        main_dir, img['file_name'] + "___objects.json"
-                    ), "w"
+                    os.path.join(main_dir, img['file_name'] + "___pixel.json"),
+                    "w"
                 ) as new_json:
                     json.dump(
                         [
@@ -330,10 +342,22 @@ if 'keypoints' in str(coco_json_file):
                     } for p in range(len(annot['segmentation']))
                 ]
 
-                # sa_template = {'type': 'template', 'classId': cat['id'], 'probability': 100, 'points': [], 'connections': [],
-                #                'attributes': [], 'groupId': annot['id'], 'pointLabels': {}, 'locked': False, 'visible': True,
-                #                'templateId': annot['id'] - 1, 'className': cat['name'], 'templateName': 'skeleton',
-                #                'imageId': annot['image_id']}
+                sa_template = {
+                    'type': 'template',
+                    'classId': cat['id'],
+                    'probability': 100,
+                    'points': [],
+                    'connections': [],
+                    'attributes': [],
+                    'groupId': annot['id'],
+                    'pointLabels': {},
+                    'locked': False,
+                    'visible': True,
+                    'templateId': annot['id'] - 1,
+                    'className': cat['name'],
+                    'templateName': 'skeleton',
+                    'imageId': annot['image_id']
+                }
 
                 # for img_id, group_id, img_kps in kp_ids_loader:
                 #     for loader_img_id, loader_point_data in kp_point_loader:

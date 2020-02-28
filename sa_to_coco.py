@@ -110,7 +110,6 @@ def load_files(path_to_imgs, ratio, task):
     else:
         suffix = '___objects.json'
 
-
     all_files = None
     if task == 'keypoint_detection':
         all_files = np.array(
@@ -122,10 +121,8 @@ def load_files(path_to_imgs, ratio, task):
     else:
         all_files = np.array(
             [
-                (
-                    fname, fname + suffix,
-                    fname + '___save.png'
-                ) for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
+                (fname, fname + suffix, fname + '___save.png')
+                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
             ]
         )
     num_train_vals = int(len(all_files) * (ratio / 100))
@@ -239,5 +236,5 @@ if __name__ == '__main__':
         logging.error(
             'Something went wrong while converting the validation set'
         )
-        logging.error( e )
+        logging.error(e)
         sys.exit()

@@ -2,7 +2,7 @@
 
 ## Installation
 
-Run `bash install.sh`. This adds python virtualenv "venv_sa_conv" and
+Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
 installs required packages.
 
 ## Usage
@@ -56,7 +56,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *please note*: conversion to coco dataset format for panoptic segmentation task is only supported for projects of type pixel in annotate.online
 
-**Note**: You should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
+**Note**: You should have all your images their corresponding `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
 
 #### Instance Segmentation
 
@@ -64,7 +64,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name] -od [output_directory] -cp [copyQ]
 ```
 
-**Note**: if your project is of type 'pixel' you should have all your images their corresponing `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder. 
+**Note**: if your project is of type 'pixel' you should have all your images their corresponding `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder. 
 If your project is of type  'vector' then you will need all your images their corresponding `lores.jpg`, `objects.json` and `classes.json` files in the same folder
 
 #### Keypoint detection
@@ -75,7 +75,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 
 *please note*: conversion to coco dataset format for keypoint detection task is only supported for projects of type 'vector' in annotate.online. Furthermore each template should fully describe an object. 
 
-**Note**: You should have all your images their coresponing `objects.json` files in one folder as well as the `classes.json` file in the same folder. 
+**Note**: You should have all your images their corresponding `objects.json` files in one folder as well as the `classes.json` file in the same folder. 
 
 
 

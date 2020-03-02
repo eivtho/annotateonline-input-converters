@@ -179,17 +179,27 @@ if 'instances' in str(coco_json_file):
 
                 sa_polygon_loader = [
                     {
-                        'type': 'polygon',
-                        'points': annot['segmentation'][p],
-                        'className': cat['name'],
-                        'classId': cat['id'],
+                        'type':
+                            'polygon',
+                        'points':
+                            annot['segmentation'][
+                                annot['segmentation'].index(polygon)],
+                        'className':
+                            cat['name'],
+                        'classId':
+                            cat['id'],
                         'attributes': [],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': annot['id'],
-                        'imageId': annot['image_id']
-                    } for p in range(len(annot['segmentation']))
+                        'probability':
+                            100,
+                        'locked':
+                            False,
+                        'visible':
+                            True,
+                        'groupId':
+                            annot['id'],
+                        'imageId':
+                            annot['image_id']
+                    } for polygon in annot['segmentation']
                 ]
 
                 for img in json_data['images']:
@@ -343,21 +353,23 @@ if 'keypoints' in str(coco_json_file):
                         pl_key = keypoint_names.index(kp_name)
                         sa_template['pointLabels'][pl_key] = kp_name
 
-                    for i in range(len(cat['skeleton'])):
+                    for connection in cat['skeleton']:
+                        index = cat['skeleton'].index(connection)
                         sa_template['connections'].append(
                             {
-                                'id': i + 1,
-                                'from': cat['skeleton'][i][0],
-                                'to': cat['skeleton'][i][1]
+                                'id': index + 1,
+                                'from': cat['skeleton'][index][0],
+                                'to': cat['skeleton'][index][1]
                             }
                         )
 
-                    for p in range(len(sa_points)):
+                    for point in sa_points:
+                        point_index = sa_points.index(point)
                         sa_template['points'].append(
                             {
-                                'id': p + 1,
-                                'x': sa_points[p][0],
-                                'y': sa_points[p][1]
+                                'id': point_index + 1,
+                                'x': sa_points[point_index][0],
+                                'y': sa_points[point_index][1]
                             }
                         )
 

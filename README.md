@@ -61,7 +61,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *Example*
 ```
-python sa_to_coco.py -is ./test_images/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output -cp True
+python sa_to_coco.py -is ./Tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output -cp True
 
 ```
 
@@ -77,7 +77,7 @@ If your project is of type  'vector' then you will need all your images their co
 *Example*
 
 ```
-python sa_to_coco.py -is ./test_images/cats_dogs_pan -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
+python sa_to_coco.py -is ./Tests/fromAnnotateOnline/cats_dogs_pan -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
 
 ```
 

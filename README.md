@@ -61,7 +61,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *Example*
 ```
-python sa_to_coco.py -is ./Tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output -cp True
 
 ```
 
@@ -77,9 +77,17 @@ If your project is of type  'vector' then you will need all your images their co
 *Example*
 
 ```
-python sa_to_coco.py -is ./Tests/fromAnnotateOnline/cats_dogs_pan -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
 
 ```
+
+Projects that have type vector with polygon annotations can still be converted to coco format 
+
+```
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_polygons -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
+
+```
+
 
 #### Keypoint detection
 
@@ -91,5 +99,11 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 
 **Note**: You should have all your images their corresponding `objects.json` files in one folder as well as the `classes.json` file in the same folder. 
 
+*Example*
+
+```
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -ptype pixel -t instance_segmentation -dn test_keypoint -od output_pan -cp True
+
+```
 
 

@@ -93,17 +93,6 @@ def rle_to_polygon(annotation):
     return segmentation
 
 
-# Merges tuples by first key
-def merge_tuples(list_of_tuples):
-    mergeddict = defaultdict(list)
-    for group in list_of_tuples:
-        mergeddict[group[:-1]].append(group[-1])
-    return [
-        (k + (tuple(v), ) if len(v) > 1 else k + tuple(v))
-        for k, v in mergeddict.items()
-    ]
-
-
 # Returns unique values of list. Values can be dicts or lists!
 def dict_setter(list_of_dicts):
     return [

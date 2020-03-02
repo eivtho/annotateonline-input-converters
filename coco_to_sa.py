@@ -179,17 +179,27 @@ if 'instances' in str(coco_json_file):
 
                 sa_polygon_loader = [
                     {
-                        'type': 'polygon',
-                        'points': annot['segmentation'][p],
-                        'className': cat['name'],
-                        'classId': cat['id'],
+                        'type':
+                            'polygon',
+                        'points':
+                            annot['segmentation'][
+                                annot['segmentation'].index(polygon)],
+                        'className':
+                            cat['name'],
+                        'classId':
+                            cat['id'],
                         'attributes': [],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': annot['id'],
-                        'imageId': annot['image_id']
-                    } for p in range(len(annot['segmentation']))
+                        'probability':
+                            100,
+                        'locked':
+                            False,
+                        'visible':
+                            True,
+                        'groupId':
+                            annot['id'],
+                        'imageId':
+                            annot['image_id']
+                    } for polygon in annot['segmentation']
                 ]
 
                 for img in json_data['images']:
@@ -263,73 +273,38 @@ if 'panoptic' in str(coco_json_file):
 if 'keypoints' in str(coco_json_file):
     kp_loader = []
 
-    kp_point_loader = []
-    kp_ids_loader = []
     for annot in json_data['annotations']:
-        kp_ids = []
-        if int(annot['num_keypoints']) > 0:
-            kp_points = [
+        if annot['num_keypoints'] > 0:
+            sa_points = [
                 item for index, item in enumerate(annot['keypoints'])
                 if (index + 1) % 3 != 0
             ]
-            kp_points = [
-                (kp_points[i], kp_points[i + 1])
-                for i in range(0, len(kp_points), 2)
+
+            for n, i in enumerate(sa_points):
+                if i == 0:
+                    sa_points[n] = -17
+            sa_points = [
+                (sa_points[i], sa_points[i + 1])
+                for i in range(0, len(sa_points), 2)
             ]
-            kp_ids = merge_tuples(
-                [
-                    (annot['image_id'], annot['id'], kp_points.index(tup) + 1)
-                    for tup in kp_points if tup[0] != 0
-                ]
-            )
-            kp_points = [
-                (
-                    annot['image_id'],
-                    (annot['id'], kp_points.index(tup) + 1, tup[0], tup[1])
-                ) for tup in kp_points if tup[0] != 0
-            ]
+            print(sa_points)
+            for cat in json_data['categories']:
+                keypoint_names = cat['keypoints']
 
-            for el in kp_points:
-                kp_point_loader.append(el)
-            for el in kp_ids:
-                kp_ids_loader.append(el)
+                if annot['iscrowd'] == 1:
+                    annot['segmentation'] = rle_to_polygon(annot)
 
-        for cat in json_data['categories']:
-            coco_keypoints = cat['keypoints']
-            sa_point_labels = {}
+                if cat['id'] == annot['category_id']:
 
-            for ckp in coco_keypoints:
-                sa_point_labels[coco_keypoints.index(ckp) + 1] = ckp
-
-            if annot['iscrowd'] == 1:
-                annot['segmentation'] = rle_to_polygon(annot)
-
-            if cat['id'] == annot['category_id']:
-
-                sa_dict_bbox = {
-                    'type': 'bbox',
-                    'points':
-                        {
-                            'x1': annot['bbox'][0],
-                            'y1': annot['bbox'][1],
-                            'x2': annot['bbox'][0] + annot['bbox'][2],
-                            'y2': annot['bbox'][1] + annot['bbox'][3]
-                        },
-                    'className': cat['name'],
-                    'classId': cat['id'],
-                    'pointLabels': {},
-                    'attributes': [],
-                    'probability': 100,
-                    'locked': False,
-                    'visible': True,
-                    'groupId': annot['id'],
-                    'imageId': annot['image_id']
-                }
-
-                sa_polygon_loader = [
-                    {
-                        'type': 'polygon',
-                        'points': annot['segmentation'][p],
+                    sa_dict_bbox = {
+                        'type': 'bbox',
+                        'points':
+                            {
+                                'x1': annot['bbox'][0],
+                                'y1': annot['bbox'][1],
+                                'x2': annot['bbox'][0] + annot['bbox'][2],
+                                'y2': annot['bbox'][1] + annot['bbox'][3]
+                            },
                         'className': cat['name'],
                         'classId': cat['id'],
                         'pointLabels': {},
@@ -339,70 +314,81 @@ if 'keypoints' in str(coco_json_file):
                         'visible': True,
                         'groupId': annot['id'],
                         'imageId': annot['image_id']
-                    } for p in range(len(annot['segmentation']))
-                ]
+                    }
 
-                sa_template = {
-                    'type': 'template',
-                    'classId': cat['id'],
-                    'probability': 100,
-                    'points': [],
-                    'connections': [],
-                    'attributes': [],
-                    'groupId': annot['id'],
-                    'pointLabels': {},
-                    'locked': False,
-                    'visible': True,
-                    'templateId': annot['id'] - 1,
-                    'className': cat['name'],
-                    'templateName': 'skeleton',
-                    'imageId': annot['image_id']
-                }
+                    sa_polygon_loader = [
+                        {
+                            'type': 'polygon',
+                            'points': annot['segmentation'][p],
+                            'className': cat['name'],
+                            'classId': cat['id'],
+                            'pointLabels': {},
+                            'attributes': [],
+                            'probability': 100,
+                            'locked': False,
+                            'visible': True,
+                            'groupId': annot['id'],
+                            'imageId': annot['image_id']
+                        } for p in range(len(annot['segmentation']))
+                    ]
 
-                # for img_id, group_id, img_kps in kp_ids_loader:
-                #     for loader_img_id, loader_point_data in kp_point_loader:
-                #         if type(img_kps) is int:
-                #             for pl_k, pl_v in sa_point_labels.items():
-                #                 if img_kps == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id:
-                #                     sa_template['points'].append({'id': loader_point_data[1], 'x': loader_point_data[2],
-                #                                                   'y': loader_point_data[3]})
-                #                     sa_template['pointLabels'][pl_k] = pl_v
-                #         else:
-                #             for img_kp in img_kps:
-                #                 for pl_k, pl_v in sa_point_labels.items():
-                #                     if img_kp == pl_k and img_id == sa_template['imageId'] and loader_img_id == img_id \
-                #                             and group_id == sa_template['groupId'] and loader_point_data[0] == sa_template['groupId']:
-                #                         sa_template['pointLabels'][pl_k] = pl_v
-                #                         sa_template['points'].append(
-                #                             {'id': loader_point_data[1], 'x': loader_point_data[2],
-                #                              'y': loader_point_data[3]})
-                #
-                #             for skeleton in cat['skeleton']:
-                #                 if loader_img_id == img_id and loader_point_data[0] == sa_template['groupId']\
-                #                         and skeleton[0] in img_kps and skeleton[1] in img_kps:
-                #                     sa_template['connections'].append({'id': 1, 'from': skeleton[0], 'to': skeleton[1]})
-                #
-                # sa_template['points'] = dict_setter(sa_template['points'])
-                # sa_template['connections'] = dict_setter(sa_template['connections'])
-                #
-                # for i in range(len(sa_template['connections'])):
-                #     sa_template['connections'][i]['id'] += i
+                    sa_template = {
+                        'type': 'template',
+                        'classId': cat['id'],
+                        'probability': 100,
+                        'points': [],
+                        'connections': [],
+                        'attributes': [],
+                        'attributeNames': [],
+                        'groupId': annot['id'],
+                        'pointLabels': {},
+                        'locked': False,
+                        'visible': True,
+                        'templateId': -1,
+                        'className': cat['name'],
+                        'templateName': 'skeleton',
+                        'imageId': annot['image_id']
+                    }
+                    for kp_name in keypoint_names:
+                        pl_key = keypoint_names.index(kp_name)
+                        sa_template['pointLabels'][pl_key] = kp_name
 
-                for img in json_data['images']:
-                    for polygon in sa_polygon_loader:
-                        if polygon['imageId'] == img['id']:
-                            kp_loader.append((img['id'], polygon))
-                        if sa_dict_bbox['imageId'] == img['id']:
-                            kp_loader.append((img['id'], sa_dict_bbox))
-                        # if sa_template['imageId'] == img['id']:
-                        #     kp_loader.append((img['id'], sa_template))
+                    for connection in cat['skeleton']:
+                        index = cat['skeleton'].index(connection)
+                        sa_template['connections'].append(
+                            {
+                                'id': index + 1,
+                                'from': cat['skeleton'][index][0],
+                                'to': cat['skeleton'][index][1]
+                            }
+                        )
 
-    for img in json_data['images']:
-        f_loader = []
-        for img_id, img_data in kp_loader:
-            if img['id'] == img_id:
-                f_loader.append(img_data)
-        with open(
-            os.path.join(main_dir, img['file_name'] + "___objects.json"), "w"
-        ) as new_json:
-            json.dump(dict_setter(f_loader), new_json, indent=2)
+                    for point in sa_points:
+                        point_index = sa_points.index(point)
+                        sa_template['points'].append(
+                            {
+                                'id': point_index + 1,
+                                'x': sa_points[point_index][0],
+                                'y': sa_points[point_index][1]
+                            }
+                        )
+
+                    for img in json_data['images']:
+                        for polygon in sa_polygon_loader:
+                            if polygon['imageId'] == img['id']:
+                                kp_loader.append((img['id'], polygon))
+                            if sa_dict_bbox['imageId'] == img['id']:
+                                kp_loader.append((img['id'], sa_dict_bbox))
+                            if sa_template['imageId'] == img['id']:
+                                kp_loader.append((img['id'], sa_template))
+
+        for img in json_data['images']:
+            f_loader = []
+            for img_id, img_data in kp_loader:
+                if img['id'] == img_id:
+                    f_loader.append(img_data)
+            with open(
+                os.path.join(main_dir, img['file_name'] + "___objects.json"),
+                "w"
+            ) as new_json:
+                json.dump(dict_setter(f_loader), new_json, indent=2)

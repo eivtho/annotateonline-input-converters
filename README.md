@@ -49,7 +49,7 @@ optional arguments:
 
 **IMPORTANT:** Running this command will move or copy images from source folder. It will create two folders with names "test_set" and "train_set" and move images correspondingly.
 
-#### Panoptic Segmentation 
+#### Panoptic segmentation
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_segmentation -dn [dataset_name] -od [output_directory] -cp [copyQ]
 ```
@@ -58,7 +58,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 **Note**: You should have all your images their corresponding `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
 
-#### Instance Segmentation
+#### Instance segmentation
 
 ```
 python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] -t instance_segmentation -dn [dataset_name] -od [output_directory] -cp [copyQ]

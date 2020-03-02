@@ -58,6 +58,13 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 **Note**: You should have all your images their corresponding `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder.
 
+
+*Example*
+```
+python sa_to_coco.py -is ./test_images/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output -cp True
+
+```
+
 #### Instance segmentation
 
 ```
@@ -66,6 +73,13 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [vector or pixel] 
 
 **Note**: if your project is of type 'pixel' you should have all your images their corresponding `save.png`, `pixel.json` and `lores.jpg` files in one folder as well as the `classes.json` file in the same folder. 
 If your project is of type  'vector' then you will need all your images their corresponding `lores.jpg`, `objects.json` and `classes.json` files in the same folder
+
+*Example*
+
+```
+python sa_to_coco.py -is ./test_images/cats_dogs_pan -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
+
+```
 
 #### Keypoint detection
 

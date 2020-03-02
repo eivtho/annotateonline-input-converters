@@ -118,10 +118,17 @@ def load_files(path_to_imgs, ratio, task):
                 for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
             ]
         )
-    else:
+    elif args.project_type == 'pixel':
         all_files = np.array(
             [
                 (fname, fname + suffix, fname + '___save.png')
+                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
+            ]
+        )
+    elif args.project_type == 'vector':
+        all_files = np.array(
+            [
+                (fname, fname + suffix)
                 for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
             ]
         )
@@ -224,6 +231,8 @@ if __name__ == '__main__':
             'Something is went wrong while moving or copying files from source folder'
         )
         logging.error(e)
+
+
     converter = Converter(
         args.project_type, args.task, args.dataset_name,
         os.path.join(args.output_dir, 'train_set'), args.output_dir
@@ -250,3 +259,5 @@ if __name__ == '__main__':
         )
         logging.error(e)
         sys.exit()
+
+    logging.info('Conversion completed successfully')

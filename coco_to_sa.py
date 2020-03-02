@@ -329,17 +329,18 @@ if 'keypoints' in str(coco_json_file):
                         'points': [],
                         'connections': [],
                         'attributes': [],
+                        'attributeNames': [],
                         'groupId': annot['id'],
                         'pointLabels': {},
                         'locked': False,
                         'visible': True,
-                        'templateId': annot['id'] - 1,
+                        'templateId': -1,
                         'className': cat['name'],
                         'templateName': 'skeleton',
                         'imageId': annot['image_id']
                     }
                     for kp_name in keypoint_names:
-                        pl_key = keypoint_names.index(kp_name) + 1
+                        pl_key = keypoint_names.index(kp_name)
                         sa_template['pointLabels'][pl_key] = kp_name
 
                     for i in range(len(cat['skeleton'])):

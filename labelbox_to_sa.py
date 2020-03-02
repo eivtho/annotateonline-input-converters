@@ -6,15 +6,13 @@ import requests
 from collections import defaultdict
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--lb_json",
-                    type=str,
-                    required=True,
-                    help="Argument must be JSON file")
+parser.add_argument(
+    "--lb_json", type=str, required=True, help="Argument must be JSON file"
+)
 p = parser.parse_args()
 
 lb_json = p.lb_json
 lb_json_folder, lb_json_file = os.path.split(lb_json)
-
 
 main_dir = os.path.join(os.path.abspath(lb_json) + "__formated")
 if not os.path.exists(main_dir):
@@ -82,7 +80,9 @@ for d in data:
                 classes_dict['color'] = color
                 classes_dict['attribute_groups'] = []
             classes_loader.append(classes_dict)
-            with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
+            with open(
+                os.path.join(classes_dir, "classes.json"), "w"
+            ) as classes_json:
                 json.dump(classes_loader, classes_json, indent=2)
 
             for i in range(len(d['Label'][class_name])):
@@ -97,7 +97,8 @@ for d in data:
                 loader_dict['attributes'] = []
                 loader_dict['className'] = class_name
                 if loader_dict['className'] == class_name:
-                    loader_dict['classId'] = classes_set_list.index(class_name) + 1
+                    loader_dict['classId'
+                               ] = classes_set_list.index(class_name) + 1
                 for el in d['Label'][class_name][i].values():
                     polygon_points = []
 
@@ -108,7 +109,12 @@ for d in data:
 
                     elif len(el) == 4 and isinstance(el, list):
                         loader_dict['type'] = 'bbox'
-                        loader_dict['points'] = {"x1": el[0]['x'], "x2": el[2]['x'], "y1": el[0]['y'], "y2": el[2]['y']}
+                        loader_dict['points'] = {
+                            "x1": el[0]['x'],
+                            "x2": el[2]['x'],
+                            "y1": el[0]['y'],
+                            "y2": el[2]['y']
+                        }
 
                     for el_index in range(len(el)):
                         if len(el) > 4:
@@ -125,7 +131,11 @@ for d in data:
                 for image_name in image_names_list:
                     for key, value in def_dict.items():
                         if key == image_name:
-                            with open(os.path.join(main_dir, image_name + "___objects.json"), "w") as new_json:
+                            with open(
+                                os.path.join(
+                                    main_dir, image_name + "___objects.json"
+                                ), "w"
+                            ) as new_json:
                                 json.dump(value, new_json, indent=2)
 
         except KeyError:
@@ -133,4 +143,3 @@ for d in data:
 
     for link, name in images_link_list:
         download_image(link, name)
-

@@ -208,10 +208,22 @@ if __name__ == '__main__':
             os.path.join(args.input_images_source, 'classes/classes.json')
         )
 
-    train_set, test_set = load_files(
-        args.input_images_source, args.train_val_split_ratio, args.task
-    )
-    move_files(train_set, test_set, args.output_dir, args.copyQ)
+    try:
+        train_set, test_set = load_files(
+            args.input_images_source, args.train_val_split_ratio, args.task
+        )
+    except Exception as e:
+        logging.error(
+            'Something went wrong while loading files from source directory, check if you have valid export'
+        )
+        logging.error(e)
+    try:
+        move_files(train_set, test_set, args.output_dir, args.copyQ)
+    except Exception as e:
+        logging.error(
+            'Something is went wrong while moving or copying files from source folder'
+        )
+        logging.error(e)
     converter = Converter(
         args.project_type, args.task, args.dataset_name,
         os.path.join(args.output_dir, 'train_set'), args.output_dir

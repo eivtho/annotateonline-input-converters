@@ -105,16 +105,26 @@ def sa_vector_to_coco_keypoint_detection(
         json_data = __load_one_json(path_)
 
         for instance in json_data:
+            if instance['type'] == 'template' and 'templateName' not in instance:
+                logging.warning(
+                    'There was a template with no "templateName". \
+                                This can happen if the template was deleted from annotate.online. Ignoring this annotation'
+                )
+                continue
 
             if instance['type'] != 'template' or instance['templateName'
                                                          ] in template_names:
                 continue
-            template_names.add(instance['templateName'])
-            skeleton = __make_skeleton(instance)
-            keypoints = __make_keypoints(instance)
-            id_ = next(id_generator)
-            supercategory = instance['className']
-            name = instance['templateName']
+            try:
+                template_names.add(instance['templateName'])
+                skeleton = __make_skeleton(instance)
+                keypoints = __make_keypoints(instance)
+                id_ = next(id_generator)
+                supercategory = instance['className']
+                name = instance['templateName']
+            except Exception as e:
+                print('vigen')
+                print(e)
 
             category_item = {
                 'name': name,
@@ -124,14 +134,13 @@ def sa_vector_to_coco_keypoint_detection(
                 'id': id_
             }
             categories.append(category_item)
-
         image_id = next(id_generator_img)
         image_info = make_image_info(path_, image_id, 'vector')
         images.append(image_info)
+
         for instance in json_data:
             cat_id = None
             if instance['type'] == 'template':
-
                 for cat in categories:
                     if cat['name'] == instance['templateName']:
                         cat_id = cat['id']
@@ -140,5 +149,4 @@ def sa_vector_to_coco_keypoint_detection(
                     instance, id_generator_anno, cat_id, image_info['id']
                 )
                 annotations.append(annotation)
-
     return (categories, annotations, images)

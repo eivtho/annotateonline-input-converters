@@ -119,28 +119,24 @@ def load_files(path_to_imgs, ratio, task):
     else:
         suffix = '___objects.json'
 
+    orig_images = glob.glob(os.path.join(path_to_imgs, '*.*'))
+    orig_images = [x for x in orig_images if len(x.split('.')) == 3]
+
     all_files = None
+
     if task == 'keypoint_detection':
-        all_files = np.array(
-            [
-                (fname, fname + suffix)
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
-            ]
-        )
+        all_files = np.array([(fname, fname + suffix) for fname in orig_images])
+
     elif args.project_type == 'pixel':
         all_files = np.array(
             [
                 (fname, fname + suffix, fname + '___save.png')
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
+                for fname in orig_images
             ]
         )
     elif args.project_type == 'vector':
-        all_files = np.array(
-            [
-                (fname, fname + suffix)
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
-            ]
-        )
+        all_files = np.array([(fname, fname + suffix) for fname in orig_images])
+
     num_train_vals = int(len(all_files) * (ratio / 100))
 
     num_test_vals = len(all_files) - num_train_vals
@@ -152,8 +148,13 @@ def load_files(path_to_imgs, ratio, task):
     all_indices = set(range(len(all_files)))
 
     test_indices = all_indices.difference(train_indices)
-    test_set = all_files[np.array(list(test_indices))]
-    train_set = all_files[np.array(list(train_indices))]
+    test_set = None
+    train_set = None
+
+    if len(test_indices) > 0:
+        test_set = all_files[np.array(list(test_indices))]
+    if len(train_indices) > 0:
+        train_set = all_files[np.array(list(train_indices))]
 
     return (train_set, test_set)
 
@@ -175,14 +176,14 @@ def move_files(train_set, test_set, src, cp):
         logging.warning(
             'Source image files will be moved to output_dir/test and output_dir/train folders'
         )
-
-    for tup in train_set:
-        for i in tup:
-            move_fn(i, os.path.join(train_path, i.split('/')[-1]))
-
-    for tup in test_set:
-        for i in tup:
-            move_fn(i, os.path.join(test_path, i.split('/')[-1]))
+    if train_set is not None:
+        for tup in train_set:
+            for i in tup:
+                move_fn(i, os.path.join(train_path, i.split('/')[-1]))
+    if test_set is not None:
+        for tup in test_set:
+            for i in tup:
+                move_fn(i, os.path.join(test_path, i.split('/')[-1]))
 
 
 def create_classes_mapper(imgs, classes_json):
@@ -206,6 +207,8 @@ def create_classes_mapper(imgs, classes_json):
 if __name__ == '__main__':
     args = parse_args()
 
+    train_set = None
+    test_set = None
     if not passes_sanity_checks(args):
         sys.exit()
 
@@ -241,32 +244,34 @@ if __name__ == '__main__':
         )
         logging.error(e)
 
-
     converter = Converter(
         args.project_type, args.task, args.dataset_name,
         os.path.join(args.output_dir, 'train_set'), args.output_dir
     )
 
-    converter.strategy.set_dataset_name(args.dataset_name + '_train')
+    if train_set is not None:
+        converter.strategy.set_dataset_name(args.dataset_name + '_train')
 
-    try:
-        converter.convert_from_sa()
-    except Exception as e:
-        logging.error('Something went wrong while converting train set')
-        logging.error(e)
-        sys.exit()
+        try:
+            converter.convert_from_sa()
+        except Exception as e:
+            logging.error('Something went wrong while converting train set')
+            logging.error(e)
+            sys.exit()
 
     converter.strategy.set_dataset_name(args.dataset_name + '_test')
     converter.strategy.set_export_root(
         os.path.join(args.output_dir, 'test_set')
     )
-    try:
-        converter.convert_from_sa()
-    except Exception as e:
-        logging.error(
-            'Something went wrong while converting the validation set'
-        )
-        logging.error(e)
-        sys.exit()
+
+    if test_set is not None:
+        try:
+            converter.convert_from_sa()
+        except Exception as e:
+            logging.error(
+                'Something went wrong while converting the validation set'
+            )
+            logging.error(e)
+            sys.exit()
 
     logging.info('Conversion completed successfully')

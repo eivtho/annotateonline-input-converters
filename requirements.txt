@@ -3,5 +3,6 @@ numpy
 tqdm
 opencv-python
 pillow
+pycocotools
 git+https://github.com/cocodataset/panopticapi.git
 git+https://github.com/cocodataset/cocoapi.git#subdirectory=PythonAPI

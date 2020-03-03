@@ -114,8 +114,8 @@ def rename_png():
 
 
 # For that case if you need datasets original images
-# for i in range(len(json_data['images'])):
-#     image_downloader(json_data['images'][i]['coco_url'])
+for i in range(len(json_data['images'])):
+    image_downloader(json_data['images'][i]['coco_url'])
 
 # Classes
 for c in range(len(json_data['categories'])):
@@ -171,8 +171,7 @@ if 'instances' in str(coco_json_file):
                         'type':
                             'polygon',
                         'points':
-                            annot['segmentation'][
-                                annot['segmentation'].index(polygon)],
+                            polygon,
                         'className':
                             cat['name'],
                         'classId':

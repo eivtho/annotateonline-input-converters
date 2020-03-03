@@ -119,28 +119,21 @@ def load_files(path_to_imgs, ratio, task):
     else:
         suffix = '___objects.json'
 
+    orig_images = os.listdir(path_to_imgs)
+    orig_images = [x for x in orig_images if len(x.split('.')) == 2]
+
     all_files = None
     if task == 'keypoint_detection':
-        all_files = np.array(
-            [
-                (fname, fname + suffix)
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
-            ]
-        )
+        all_files = np.array([(fname, fname + suffix) for fname in orig_images])
     elif args.project_type == 'pixel':
         all_files = np.array(
             [
                 (fname, fname + suffix, fname + '___save.png')
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
+                for fname in orig_images
             ]
         )
     elif args.project_type == 'vector':
-        all_files = np.array(
-            [
-                (fname, fname + suffix)
-                for fname in glob.glob(os.path.join(path_to_imgs, '*.jpg'))
-            ]
-        )
+        all_files = np.array([(fname, fname + suffix) for fname in orig_images])
     num_train_vals = int(len(all_files) * (ratio / 100))
 
     num_test_vals = len(all_files) - num_train_vals
@@ -240,7 +233,6 @@ if __name__ == '__main__':
             'Something is went wrong while moving or copying files from source folder'
         )
         logging.error(e)
-
 
     converter = Converter(
         args.project_type, args.task, args.dataset_name,

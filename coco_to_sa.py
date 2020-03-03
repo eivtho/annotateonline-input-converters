@@ -114,8 +114,8 @@ def rename_png():
 
 
 # For that case if you need datasets original images
-for i in range(len(json_data['images'])):
-    image_downloader(json_data['images'][i]['coco_url'])
+# for image in json_data['images']:
+#     image_downloader(image['coco_url'])
 
 # Classes
 for c in range(len(json_data['categories'])):

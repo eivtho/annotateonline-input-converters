@@ -10,6 +10,13 @@ installs required packages.
 You need to activate python virtualenv with `source venv_sa_conv/bin/activate` beforehand.
 
 ### *From* COCO output *to* annotate.online input format
+By following this [link](http://cocodataset.org/#format-results) you can find COCO dataset's result formats for object detection, panoptic segmentation and keypoint detection tasks.
+By running [coco_to_sa.py](https://github.com/superannotateai/input_converters/blob/master/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
+For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images.
+```
+usage: coco_to_sa.py [-h] --coco-json COCO_JSON
+
+```
 
     python3 coco_to_sa.py --coco-json <input_coco_json>
 

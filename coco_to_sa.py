@@ -128,9 +128,7 @@ for c in range(len(json_data['categories'])):
             'attribute_groups': []
         }
         classes_loader.append(classes_dict)
-res_list = [
-    i for n, i in enumerate(classes_loader) if i not in classes_loader[n + 1:]
-]
+res_list = dict_setter(classes_loader)
 
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)

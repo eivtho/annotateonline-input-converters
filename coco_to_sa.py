@@ -1,6 +1,8 @@
 import argparse
 import os
 import json
+import shutil
+
 import requests
 import cv2
 import numpy as np
@@ -98,6 +100,17 @@ def dict_setter(list_of_dicts):
     return [
         j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]
     ]
+
+
+# For copying png files
+def copy_png():
+    # you can change path if the folder and JSON file aren't in the same directory
+    path = os.path.join(coco_json_folder, 'panoptic_masks')
+    for root, dirs, files in os.walk(path, topdown=False):
+        for file in files:
+            for ann in json_data['annotations']:
+                if os.path.isfile(os.path.join(root, file)):
+                    shutil.copy(os.path.join(root, ann['file_name']), os.path.join(main_dir, ann['file_name']))
 
 
 # For renaming png files
@@ -216,7 +229,9 @@ if 'instances' in str(coco_json_file):
 
 # panoptic
 if 'panoptic' in str(coco_json_file):
+    copy_png()
     rename_png()
+
     pan_loader = []
     for annot in json_data['annotations']:
         for cat in json_data['categories']:

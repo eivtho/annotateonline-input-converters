@@ -67,9 +67,9 @@ def blue_color_generator(n, hex_values=True):
             ],
             dtype=np.uint8
         )
-        hex_color = '#' + "{:02x}".format(bgr_color[2], 'x') + "{:02x}".format(
-            bgr_color[1], 'x'
-        ) + "{:02x}".format(bgr_color[0], 'x')
+        hex_color = '#' + "{:02x}".format(
+            bgr_color[2]
+        ) + "{:02x}".format(bgr_color[1], ) + "{:02x}".format(bgr_color[0])
         if hex_values:
             hex_colors.append(hex_color)
         else:
@@ -110,7 +110,10 @@ def copy_png():
         for file in files:
             for ann in json_data['annotations']:
                 if os.path.isfile(os.path.join(root, file)):
-                    shutil.copy(os.path.join(root, ann['file_name']), os.path.join(main_dir, ann['file_name']))
+                    shutil.copy(
+                        os.path.join(root, ann['file_name']),
+                        os.path.join(main_dir, ann['file_name'])
+                    )
 
 
 # For renaming png files
@@ -179,25 +182,16 @@ if 'instances' in str(coco_json_file):
 
                 sa_polygon_loader = [
                     {
-                        'type':
-                            'polygon',
-                        'points':
-                            polygon,
-                        'className':
-                            cat['name'],
-                        'classId':
-                            cat['id'],
+                        'type': 'polygon',
+                        'points': polygon,
+                        'className': cat['name'],
+                        'classId': cat['id'],
                         'attributes': [],
-                        'probability':
-                            100,
-                        'locked':
-                            False,
-                        'visible':
-                            True,
-                        'groupId':
-                            annot['id'],
-                        'imageId':
-                            annot['image_id']
+                        'probability': 100,
+                        'locked': False,
+                        'visible': True,
+                        'groupId': annot['id'],
+                        'imageId': annot['image_id']
                     } for polygon in annot['segmentation']
                 ]
 
@@ -228,7 +222,7 @@ if 'instances' in str(coco_json_file):
                     )
 
 # panoptic
-if 'panoptic' in str(coco_json_file):
+elif 'panoptic' in str(coco_json_file):
     copy_png()
     rename_png()
 
@@ -271,7 +265,7 @@ if 'panoptic' in str(coco_json_file):
                     )
 
 # keypoints
-if 'keypoints' in str(coco_json_file):
+elif 'keypoints' in str(coco_json_file):
     kp_loader = []
 
     for annot in json_data['annotations']:
@@ -320,7 +314,7 @@ if 'keypoints' in str(coco_json_file):
                     sa_polygon_loader = [
                         {
                             'type': 'polygon',
-                            'points': annot['segmentation'][p],
+                            'points': polygon,
                             'className': cat['name'],
                             'classId': cat['id'],
                             'pointLabels': {},
@@ -330,7 +324,7 @@ if 'keypoints' in str(coco_json_file):
                             'visible': True,
                             'groupId': annot['id'],
                             'imageId': annot['image_id']
-                        } for p in range(len(annot['segmentation']))
+                        } for polygon in annot['segmentation']
                     ]
 
                     sa_template = {

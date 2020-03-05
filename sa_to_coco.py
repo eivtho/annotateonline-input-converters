@@ -120,7 +120,7 @@ def load_files(path_to_imgs, ratio, task):
         suffix = '___objects.json'
 
     orig_images = glob.glob(os.path.join(path_to_imgs, '*.*'))
-    orig_images = [x for x in orig_images if '___'  not in x.split('.')[-2]]
+    orig_images = [x for x in orig_images if '___' not in x.split('.')[-2]]
     all_files = None
 
     if task == 'keypoint_detection':

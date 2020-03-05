@@ -12,33 +12,56 @@ You need to activate python virtualenv with `source venv_sa_conv/bin/activate` b
 ### *From* COCO output *to* annotate.online input format
 By following this [link](http://cocodataset.org/#format-results) you can find COCO dataset's result formats for object detection, panoptic segmentation and keypoint detection tasks.
 By running [coco_to_sa.py](https://github.com/superannotateai/input_converters/blob/master/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
-For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images.
 ```
 usage: coco_to_sa.py [-h] --coco-json COCO_JSON
 ```
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  --coco-json COCO_JSON
+                        Argument must be JSON file
+```
+**Note**: For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images.
+
     python3 coco_to_sa.py --coco-json <input_coco_json>
     
 **Note**: COCO_JSON file's name should contain one of these keywords: `instances` if task is object detection, 
 `keypoints` if task is keypoint detection and `panoptic` if task is panoptic segmentation!
 
+
+
 ##### **Object Detection**
-    `python3 ./coco_to_sa.py --coco-json ./directory/instances_test.json`
-This command will create new `instances_test.json__formated` directory in `./directory/` which will contain original images 
+
+*Example*
+```
+    python3 ./coco_to_sa.py --coco-json ./directory/instances_test.json
+```
+
+**Note**: This command will create new `instances_test.json__formated` directory in `./directory/` which will contain original images 
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
 in `./directory/instances_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Keypoint Detection**
+
+*Example*
+```
     python3 ./coco_to_sa.py --coco-json ./directory/person_keypoints_test.json
-This command will create new `person_keypoints_test.json__formated` directory in `./directory/` which will contain original images 
+```
+**Note**: This command will create new `person_keypoints_test.json__formated` directory in `./directory/` which will contain original images 
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
 in `./directory/person_keypoints_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Panoptic segmentation**
-For panoptic segmentation in addition to the `COCO_JSON` file you must also have a folder named `panoptic_masks` in the same directory
+
+**Note**: For panoptic segmentation in addition to the `COCO_JSON` file you must also have a folder named `panoptic_masks` in the same directory
 which will contain panoptic segmentation's png masks.
 
+*Example*
+```
     python3 ./coco_to_sa.py --coco-json ./directory/panoptic_test.json
-This command at first  will create new `panoptic_test.json__formated` directory in `./directory/` which will contain original images 
+```
+
+**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./directory/` which will contain original images 
 and their corresponding JSON files in annotate.online format and then will rename and move png masks
 from `./directory/panoptic_masks/` to `./directory/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory 
 in `./directory/panoptic_test.json__formated/`, which will contain `classes.json`.

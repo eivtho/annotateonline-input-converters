@@ -98,7 +98,7 @@ def rle_to_polygon(annotation):
 # Returns unique values of list. Values can be dicts or lists!
 def dict_setter(list_of_dicts):
     return [
-        j for n, j in enumerate(list_of_dicts) if j not in list_of_dicts[n + 1:]
+        d for n, d in enumerate(list_of_dicts) if d not in list_of_dicts[n + 1:]
     ]
 
 
@@ -130,8 +130,8 @@ def rename_png():
 
 
 # For that case if you need datasets original images
-# for image in json_data['images']:
-#     image_downloader(image['coco_url'])
+for image in json_data['images']:
+    image_downloader(image['coco_url'])
 
 # Classes
 for c in range(len(json_data['categories'])):
@@ -212,14 +212,7 @@ if 'instances' in str(coco_json_file):
                         main_dir, img['file_name'] + "___objects.json"
                     ), "w"
                 ) as new_json:
-                    json.dump(
-                        [
-                            i for n, i in enumerate(f_loader)
-                            if i not in f_loader[n + 1:]
-                        ],
-                        new_json,
-                        indent=2
-                    )
+                    json.dump(dict_setter(f_loader), new_json, indent=2)
 
 # panoptic
 elif 'panoptic' in str(coco_json_file):
@@ -255,14 +248,7 @@ elif 'panoptic' in str(coco_json_file):
                     os.path.join(main_dir, img['file_name'] + "___pixel.json"),
                     "w"
                 ) as new_json:
-                    json.dump(
-                        [
-                            i for n, i in enumerate(f_loader)
-                            if i not in f_loader[n + 1:]
-                        ],
-                        new_json,
-                        indent=2
-                    )
+                    json.dump(dict_setter(f_loader), new_json, indent=2)
 
 # keypoints
 elif 'keypoints' in str(coco_json_file):

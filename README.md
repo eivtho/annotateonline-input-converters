@@ -155,4 +155,31 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -
 
 ```
 
+### *From* LabelBox output *to* annotate.online input format
+There are two ways to export an output from LabelBox: in the form of JSON and CSV. You can find Label export format [here](https://labelbox.com/docs/exporting-data/export-format-detail).
+
+**Note:** We only support the method of exporting by JSON.
+
+Conversion from LabelBox output format to annotate.online input format (vector) is performed by the following command:
+
+```
+usage: labelbox_to_sa.py [-h] --lb-json LB_JSON
+```
+```
+optional arguments:
+  -h, --help         show this help message and exit
+  --lb-json LB_JSON  Argument must be JSON file
+```
+
+*Example*
+```
+    python3 ./labelbox_to_sa.py --lb-json ./directory/labelbox_export_test.json
+```
+
+**Note**: This command will create new `labelbox_export_test.json__formated` directory in `./directory/` which will contain original images 
+and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
+in `./directory/labelbox_export_test.json__formated/`, which will contain `classes.json`.
+
+
+
 

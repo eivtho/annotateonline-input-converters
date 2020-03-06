@@ -4,6 +4,8 @@ import argparse
 import requests
 import numpy as np
 
+from collections import defaultdict
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--lb-json", type=str, required=True, help="Argument must be JSON file"
@@ -20,10 +22,6 @@ if not os.path.exists(main_dir):
 classes_dir = os.path.join(main_dir, "classes")
 if not os.path.exists(classes_dir):
     os.mkdir(classes_dir)
-
-json_data = json.load(open(os.path.join(lb_json_folder, lb_json_file)))
-
-classes = set()
 
 
 # For downloading images from LabelBox's storage
@@ -69,25 +67,88 @@ def blue_color_generator(n, hex_values=True):
     return hex_colors
 
 
+json_data = json.load(open(os.path.join(lb_json_folder, lb_json_file)))
+
+classes = set()
+sa_classes_loader = []
+def_dict = defaultdict(list)
+
 for d in json_data:
     classes.update(d['Label'].keys())
 
     # download images from Labelbox's storage
     download_image(d['Labeled Data'], d['External ID'])
 
-# Classes
-sa_classes_loader = []
-for class_name in classes:
-    colors = blue_color_generator(len(classes))
-    c_index = list(classes).index(class_name)
+    # Classes
 
-    sa_classes = {
-        'id': c_index + 1,
-        'name': class_name,
-        'color': colors[c_index],
-        'attribute_groups': []
-    }
-    sa_classes_loader.append(sa_classes)
+    for class_name in classes:
+        colors = blue_color_generator(len(classes))
+        c_index = list(classes).index(class_name)
+
+        sa_classes = {
+            'id': c_index + 1,
+            'name': class_name,
+            'color': colors[c_index],
+            'attribute_groups': []
+        }
+        sa_classes_loader.append(sa_classes)
+        try:
+            for i in range(len(d['Label'][class_name])):
+                sa_loader = []
+
+                sa_obj = {
+                    'probability': 100,
+                    'groupId': 0,
+                    'pointLabels': {},
+                    'locked': False,
+                    'visible': True,
+                    'attributes': [],
+                    'className': class_name
+                }
+
+                if sa_obj['className'] == class_name:
+                    sa_obj['classId'] = c_index + 1
+
+                for el in d['Label'][class_name][i].values():
+                    polygon_points = []
+
+                    if len(el) == 2:
+                        sa_obj['type'] = 'point'
+                        sa_obj['x'] = el['x']
+                        sa_obj['y'] = el['y']
+
+                    elif len(el) == 4 and isinstance(el, list):
+                        sa_obj['type'] = 'bbox'
+                        sa_obj['points'] = {
+                            "x1": el[0]['x'],
+                            "x2": el[2]['x'],
+                            "y1": el[0]['y'],
+                            "y2": el[2]['y']
+                        }
+
+                    for el_index in range(len(el)):
+                        if len(el) > 4:
+                            polygon_points.append(el[el_index]['x'])
+                            polygon_points.append(el[el_index]['y'])
+                            sa_obj['type'] = 'polygon'
+                            sa_obj['points'] = polygon_points
+
+                sa_loader.append((d['External ID'], sa_obj))
+
+                for k, *v in sa_loader:
+                    def_dict[k].append(*v)
+
+                for key, value in def_dict.items():
+                    if key == d['External ID']:
+                        with open(
+                            os.path.join(
+                                main_dir, d['External ID'] + "___objects.json"
+                            ), "w"
+                        ) as new_json:
+                            json.dump(value, new_json, indent=2)
+
+        except KeyError:
+            print("keyerror")
 
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(list(sa_classes_loader), classes_json, indent=2)

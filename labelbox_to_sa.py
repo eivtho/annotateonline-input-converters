@@ -32,13 +32,6 @@ def download_image(url, file_name):
         f.write(r.content)
 
 
-# Returns unique values of list. Values can be dicts or lists!
-def dict_setter(list_of_dicts):
-    return [
-        d for n, d in enumerate(list_of_dicts) if d not in list_of_dicts[n + 1:]
-    ]
-
-
 # Converts HEX values to RGB values
 def hex_to_rgb(hex_string):
     h = hex_string.lstrip('#')

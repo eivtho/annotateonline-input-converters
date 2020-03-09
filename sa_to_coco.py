@@ -112,28 +112,26 @@ def parse_args():
     return args
 
 
-def load_files(path_to_imgs, ratio, task):
+def load_files(path_to_imgs, ratio, task, ptype):
     suffix = None
-    if args.project_type == 'pixel':
+    if ptype == 'pixel':
         suffix = '___pixel.json'
     else:
         suffix = '___objects.json'
-
-    orig_images = glob.glob(os.path.join(path_to_imgs, '*.*'))
+    orig_images = glob.glob(os.path.join(path_to_imgs, '*[!*mapper.json].*'))
     orig_images = [x for x in orig_images if '___' not in x.split('.')[-2]]
     all_files = None
-
     if task == 'keypoint_detection':
         all_files = np.array([(fname, fname + suffix) for fname in orig_images])
 
-    elif args.project_type == 'pixel':
+    elif ptype == 'pixel':
         all_files = np.array(
             [
                 (fname, fname + suffix, fname + '___save.png')
                 for fname in orig_images
             ]
         )
-    elif args.project_type == 'vector':
+    elif ptype == 'vector':
         all_files = np.array([(fname, fname + suffix) for fname in orig_images])
 
     num_train_vals = int(len(all_files) * (ratio / 100))
@@ -201,15 +199,9 @@ def create_classes_mapper(imgs, classes_json):
         os.path.join(imgs, 'train_set', 'classes_mapper.json'), 'w'
     ) as fp:
         json.dump(classes, fp)
-
-
-if __name__ == '__main__':
-    args = parse_args()
-
+def main(args, create_classes_mapper_fn = create_classes_mapper ):
     train_set = None
     test_set = None
-    if not passes_sanity_checks(args):
-        sys.exit()
 
     try:
         os.makedirs(os.path.join(args.output_dir, 'train_set'))
@@ -219,16 +211,18 @@ if __name__ == '__main__':
             'Could not make test and train set paths, check if they already exist'
         )
         sys.exit()
-
-    if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':
-        create_classes_mapper(
-            args.output_dir,
-            os.path.join(args.input_images_source, 'classes/classes.json')
-        )
+    try:
+        if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':
+            create_classes_mapper_fn(
+                args.output_dir,
+                os.path.join(args.input_images_source, 'classes/classes.json')
+            )
+    except Exception as e:
+        create_classes_mapper_fn(args.input_images_source, args.output_dir)
 
     try:
         train_set, test_set = load_files(
-            args.input_images_source, args.train_val_split_ratio, args.task
+            args.input_images_source, args.train_val_split_ratio, args.task, args.project_type
         )
     except Exception as e:
         logging.error(
@@ -274,3 +268,10 @@ if __name__ == '__main__':
             sys.exit()
 
     logging.info('Conversion completed successfully')
+
+if __name__ == '__main__':
+    args = parse_args()
+
+    if not passes_sanity_checks(args):
+        sys.exit()
+    main(args)

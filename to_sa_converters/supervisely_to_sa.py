@@ -26,6 +26,7 @@ if not os.path.exists(classes_dir):
 
 meta_data = {}
 mapped_classes_data = {}
+jsons_dir = ''
 for root, dirs, files in os.walk(sv_folder, topdown=True):
     for file_name in files:
 
@@ -40,6 +41,9 @@ for root, dirs, files in os.walk(sv_folder, topdown=True):
 
         if file_name == 'meta.json':
             meta_data = json.load(open(os.path.join(root, file_name)))
+
+        if file_name.endswith('.json') and file_name != 'meta.json' and file_name != 'obj_class_to_machine_color.json':
+            jsons_dir = root
 
 sa_template_loader = []
 sa_classes_loader = []
@@ -87,7 +91,7 @@ for md in meta_data['classes']:
                     'y': md['geometry_config']['nodes'][pn]['loc'][1]
                 }
             )
-            sa_template['pointLabels'][point_index + 1] = md['geometry_config']['nodes'][pn]['label']
+            sa_template['pointLabels'][point_index] = md['geometry_config']['nodes'][pn]['label']
         sa_template_loader.append(sa_template)
 
     else:
@@ -102,3 +106,29 @@ for md in meta_data['classes']:
 
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(sa_classes_loader, classes_json, indent=2)
+
+for json_file in os.listdir(jsons_dir):
+    json_data = json.load(open(os.path.join(jsons_dir, json_file)))
+
+    sa_loader = []
+
+    for obj in json_data['objects']:
+
+        sa_obj = {
+            'type': '',
+            'points': [],
+            'className': obj['classTitle'],
+            'classId': 0,
+            'pointLabels': {},
+            'attributes': [],
+            'probability': 100,
+            'locked': False,
+            'visible': True,
+            'groupId': 0
+        }
+
+        sa_loader.append(sa_obj)
+
+    with open(os.path.join(sa_folder, json_file.replace('.json', '___objects.json')), "w") as sa_json:
+        json.dump(sa_loader, sa_json, indent=2)
+

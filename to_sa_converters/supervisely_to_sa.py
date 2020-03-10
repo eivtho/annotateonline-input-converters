@@ -7,8 +7,6 @@ import shutil
 import argparse
 import numpy as np
 
-from pprint import pprint
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--sv-export-dir",

@@ -47,6 +47,7 @@ for root, dirs, files in os.walk(sv_folder, topdown=True):
 
 sa_template_loader = []
 sa_classes_loader = []
+classes_data = []
 
 for md in meta_data['classes']:
     point_names = []
@@ -103,6 +104,7 @@ for md in meta_data['classes']:
         }
 
         sa_classes_loader.append(classes_dict)
+    classes_data.append((md['title'], mapped_classes_data[md['title']][0] * (-1), md['shape']))
 
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(sa_classes_loader, classes_json, indent=2)
@@ -113,21 +115,46 @@ for json_file in os.listdir(jsons_dir):
     sa_loader = []
 
     for obj in json_data['objects']:
+        for name, id, type in classes_data:
+            if obj['classTitle'] == name:
 
-        sa_obj = {
-            'type': '',
-            'points': [],
-            'className': obj['classTitle'],
-            'classId': 0,
-            'pointLabels': {},
-            'attributes': [],
-            'probability': 100,
-            'locked': False,
-            'visible': True,
-            'groupId': 0
-        }
+                sa_obj = {
+                    'type': '',
+                    'points': [],
+                    'className': name,
+                    'classId': id,
+                    'pointLabels': {},
+                    'attributes': [],
+                    'probability': 100,
+                    'locked': False,
+                    'visible': True,
+                    'groupId': 0
+                }
 
-        sa_loader.append(sa_obj)
+                if type == 'point':
+                    del sa_obj['points']
+                    sa_obj['type'] = type
+                    sa_obj['x'] = obj['points']['exterior'][0][0]
+                    sa_obj['y'] = obj['points']['exterior'][0][1]
+
+                elif type == 'graph':
+                    for temp in sa_template_loader:
+                        if temp['className'] == name:
+                            sa_obj = temp
+
+                elif type == 'line':
+                    sa_obj['type'] = 'polyline'
+                    sa_obj['points'] = [item for el in obj['points']['exterior'] for item in el]
+
+                elif type == 'rectangle':
+                    sa_obj['type'] = 'bbox'
+                    sa_obj['points'] = {
+                        'x1': obj['points']['exterior'][0][0],
+                        'y1': obj['points']['exterior'][0][1],
+                        'x2': obj['points']['exterior'][1][0],
+                        'y2': obj['points']['exterior'][1][1]}
+
+                sa_loader.append(sa_obj)
 
     with open(os.path.join(sa_folder, json_file.replace('.json', '___objects.json')), "w") as sa_json:
         json.dump(sa_loader, sa_json, indent=2)

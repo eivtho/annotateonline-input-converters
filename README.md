@@ -180,6 +180,8 @@ optional arguments:
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
 in `./directory/labelbox_export_test.json__formated/`, which will contain `classes.json`.
 
+## Contact
 
+For questions please contact Hovnatan Karapetyan at `hovnatan at superannotate.com`.
 
 

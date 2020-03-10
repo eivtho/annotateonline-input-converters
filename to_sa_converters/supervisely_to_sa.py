@@ -1,7 +1,11 @@
 import os
+import cv2
 import json
+import zlib
+import base64
 import shutil
 import argparse
+import numpy as np
 
 from pprint import pprint
 
@@ -23,6 +27,26 @@ if not os.path.exists(sa_folder):
 classes_dir = os.path.join(sa_folder, "classes")
 if not os.path.exists(classes_dir):
     os.mkdir(classes_dir)
+
+
+# Converts bitmaps to polygon
+def base64_to_polygon(bitmap):
+    z = zlib.decompress(base64.b64decode(bitmap))
+    n = np.frombuffer(z, np.uint8)
+    mask = cv2.imdecode(n, cv2.IMREAD_UNCHANGED)[:, :, 3].astype(bool)
+    contours, hierarchy = cv2.findContours(
+        mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    )
+    segmentation = []
+
+    for contour in contours:
+        contour = contour.flatten().tolist()
+        if len(contour) > 4:
+            segmentation.append(contour)
+        if len(segmentation) == 0:
+            continue
+    return segmentation
+
 
 meta_data = {}
 mapped_classes_data = {}
@@ -137,11 +161,6 @@ for json_file in os.listdir(jsons_dir):
                     sa_obj['x'] = obj['points']['exterior'][0][0]
                     sa_obj['y'] = obj['points']['exterior'][0][1]
 
-                elif type == 'graph':
-                    for temp in sa_template_loader:
-                        if temp['className'] == name:
-                            sa_obj = temp
-
                 elif type == 'line':
                     sa_obj['type'] = 'polyline'
                     sa_obj['points'] = [item for el in obj['points']['exterior'] for item in el]
@@ -154,8 +173,23 @@ for json_file in os.listdir(jsons_dir):
                         'x2': obj['points']['exterior'][1][0],
                         'y2': obj['points']['exterior'][1][1]}
 
+                elif type == 'polygon':
+                    sa_obj['type'] = 'polygon'
+                    sa_obj['points'] = [item for el in obj['points']['exterior'] for item in el]
+
+                elif type == 'graph':
+                    for temp in sa_template_loader:
+                        if temp['className'] == name:
+                            sa_obj = temp
+
+                elif type == 'bitmap':
+                    for ppoints in base64_to_polygon(obj['bitmap']['data']):
+                        sa_ppoints = [x + obj['bitmap']['origin'][0] if i % 2 == 0 else x + obj['bitmap']['origin'][1]
+                                      for i, x in enumerate(ppoints)]
+                        sa_obj['type'] = 'polygon'
+                        sa_obj['points'] = sa_ppoints
+
                 sa_loader.append(sa_obj)
 
     with open(os.path.join(sa_folder, json_file.replace('.json', '___objects.json')), "w") as sa_json:
         json.dump(sa_loader, sa_json, indent=2)
-

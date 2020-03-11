@@ -11,7 +11,7 @@ You need to activate python virtualenv with `source venv_sa_conv/bin/activate` b
 
 ### *From* COCO output *to* annotate.online input format
 By following this [link](http://cocodataset.org/#format-results) you can find COCO dataset's result formats for object detection, panoptic segmentation and keypoint detection tasks.
-By running [coco_to_sa.py](https://github.com/superannotateai/input_converters/blob/master/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
+By running [coco_to_sa.py](https://github.com/superannotateai/annotateonline-input-converters/blob/master/to_sa_converters/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
 ```
 usage: coco_to_sa.py [-h] --coco-json COCO_JSON
 ```
@@ -179,6 +179,36 @@ optional arguments:
 **Note**: This command will create new `labelbox_export_test.json__formated` directory in `./directory/` which will contain original images 
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
 in `./directory/labelbox_export_test.json__formated/`, which will contain `classes.json`.
+
+
+### *From* Supervisely output *to* annotate.online input format
+There are three ways to export an output from Supervisely: 1) only JSON files, 2) JSON files + original images, 3)JSON files + original images + annotated png masks.
+
+*please note*: for conversion to annotate.online's vector format you need to download a data either as type 2 or type 3!
+
+**Note**: You can find Supervisely format [here](https://docs.supervise.ly/import/local_files/supervisely/) and Supervisely annotation format(JSON) [here](https://docs.supervise.ly/ann_format/).
+
+Conversion from Supervisely output format to annotate.online input format (vector) is performed by the following command:
+
+```
+usage: supervisely_to_sa.py [-h] --sv-export-dir SV_EXPORT_DIR
+```
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  --sv-export-dir SV_EXPORT_DIR
+                        Path of the directory, which contains all exported
+                        data
+```
+
+*Example*
+```
+    python3 ./supervisely_to_sa.py --sv-export-dir ./directory/supervisely_test/
+```
+
+**Note**: This command will create new `supervisely_test__converted` directory in `./directory/` which will contain original images 
+and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
+in `./directory/supervisely_test__converted/`, which will contain `classes.json`.
 
 ## Contact
 

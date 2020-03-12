@@ -155,61 +155,6 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -
 
 ```
 
-### *From* LabelBox output *to* annotate.online input format
-There are two ways to export an output from LabelBox: in the form of JSON and CSV. You can find Label export format [here](https://labelbox.com/docs/exporting-data/export-format-detail).
-
-**Note:** We only support the method of exporting by JSON.
-
-Conversion from LabelBox output format to annotate.online input format (vector) is performed by the following command:
-
-```
-usage: labelbox_to_sa.py [-h] --lb-json LB_JSON
-```
-```
-optional arguments:
-  -h, --help         show this help message and exit
-  --lb-json LB_JSON  Argument must be JSON file
-```
-
-*Example*
-```
-    python3 ./labelbox_to_sa.py --lb-json ./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/labelbox_export_test.json
-```
-
-**Note**: This command will create new `labelbox_export_test.json__formated` directory in `./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/` which will contain original images
-and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/labelbox_export_test.json__formated/`, which will contain `classes.json`.
-
-
-### *From* Supervisely output *to* annotate.online input format
-There are three ways to export an output from Supervisely: 1) only JSON files, 2) JSON files + original images, 3)JSON files + original images + annotated png masks.
-
-*please note*: for conversion to annotate.online's vector format you need to download a data either as type 2 or type 3!
-
-**Note**: You can find Supervisely format [here](https://docs.supervise.ly/import/local_files/supervisely/) and Supervisely annotation format(JSON) [here](https://docs.supervise.ly/ann_format/).
-
-Conversion from Supervisely output format to annotate.online input format (vector) is performed by the following command:
-
-```
-usage: supervisely_to_sa.py [-h] --sv-export-dir SV_EXPORT_DIR
-```
-```
-optional arguments:
-  -h, --help            show this help message and exit
-  --sv-export-dir SV_EXPORT_DIR
-                        Path of the directory, which contains all exported
-                        data
-```
-
-*Example*
-```
-    python3 ./supervisely_to_sa.py --sv-export-dir ./tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/supervisely_test/
-```
-
-**Note**: This command will create new `supervisely_test__converted` directory in `.tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/` which will contain original images
-and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/supervisely_test__converted/`, which will contain `classes.json`.
-
 ## Contact
 
 For questions please contact Hovnatan Karapetyan at `hovnatan at superannotate.com`.

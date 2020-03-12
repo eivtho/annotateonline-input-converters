@@ -34,22 +34,22 @@ optional arguments:
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./directory/instances_test.json
+    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
 ```
 
-**Note**: This command will create new `instances_test.json__formated` directory in `./directory/` which will contain original images 
+**Note**: This command will create new `instances_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./directory/instances_test.json__formated/`, which will contain `classes.json`.
+in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Keypoint Detection**
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./directory/person_keypoints_test.json
+    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
-**Note**: This command will create new `person_keypoints_test.json__formated` directory in `./directory/` which will contain original images 
+**Note**: This command will create new `person_keypoints_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./directory/person_keypoints_test.json__formated/`, which will contain `classes.json`.
+in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Panoptic segmentation**
 
@@ -58,13 +58,13 @@ which will contain panoptic segmentation's png masks.
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./directory/panoptic_test.json
+    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
 ```
 
-**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./directory/` which will contain original images 
+**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format and then will rename and move png masks
-from `./directory/panoptic_masks/` to `./directory/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory 
-in `./directory/panoptic_test.json__formated/`, which will contain `classes.json`.
+from `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
+in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
 
 ### *From* annotate.online output *to* COCO input format
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
@@ -173,12 +173,12 @@ optional arguments:
 
 *Example*
 ```
-    python3 ./labelbox_to_sa.py --lb-json ./directory/labelbox_export_test.json
+    python3 ./labelbox_to_sa.py --lb-json ./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/labelbox_export_test.json
 ```
 
-**Note**: This command will create new `labelbox_export_test.json__formated` directory in `./directory/` which will contain original images 
+**Note**: This command will create new `labelbox_export_test.json__formated` directory in `./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./directory/labelbox_export_test.json__formated/`, which will contain `classes.json`.
+in `./tests/toAnnotateOnline/fromLabelBoxToAnnotateOnline/labelbox_export_test.json__formated/`, which will contain `classes.json`.
 
 
 ### *From* Supervisely output *to* annotate.online input format
@@ -203,12 +203,12 @@ optional arguments:
 
 *Example*
 ```
-    python3 ./supervisely_to_sa.py --sv-export-dir ./directory/supervisely_test/
+    python3 ./supervisely_to_sa.py --sv-export-dir ./tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/supervisely_test/
 ```
 
-**Note**: This command will create new `supervisely_test__converted` directory in `./directory/` which will contain original images 
+**Note**: This command will create new `supervisely_test__converted` directory in `.tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./directory/supervisely_test__converted/`, which will contain `classes.json`.
+in `./tests/toAnnotateOnline/fromSuperviselyToAnnotateOnline/supervisely_test__converted/`, which will contain `classes.json`.
 
 ## Contact
 

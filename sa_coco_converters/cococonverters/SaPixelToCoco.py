@@ -35,12 +35,14 @@ def sa_pixel_to_coco_instance_segmentation(
             contour.flatten().tolist()
             for contour in contours if len(contour.flatten().tolist()) >= 5
         ]
-
+        if len(segmentation) == 0:
+            continue
         annotations_per_image.append(
             make_annotation(
                 category_id, image_info['id'], bbox, segmentation, area, anno_id
             )
         )
+
     return (image_info, annotations_per_image)
 
 

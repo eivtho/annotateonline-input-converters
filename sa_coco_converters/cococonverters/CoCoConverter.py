@@ -34,6 +34,9 @@ class CoCoConverter(object):
     def set_dataset_name(self, dname):
         self.dataset_name = dname
 
+    def set_num_converted(self, num_converted_):
+        self.num_converted = num_converted_
+
     def _create_categories(self, path_to_classes):
 
         classes = None
@@ -84,6 +87,8 @@ class CoCoConverter(object):
             jsons = glob.glob(os.path.join(self.export_root, '*pixel.json'))
         elif self.project_type == 'vector':
             jsons = glob.glob(os.path.join(self.export_root, '*objects.json'))
+
+        self.set_num_converted(len(jsons))
         return jsons
 
     def _prepare_single_image_commons_pixel(self, id_, json_path):

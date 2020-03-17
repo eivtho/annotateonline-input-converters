@@ -199,7 +199,9 @@ def create_classes_mapper(imgs, classes_json):
         os.path.join(imgs, 'train_set', 'classes_mapper.json'), 'w'
     ) as fp:
         json.dump(classes, fp)
-def main(args, create_classes_mapper_fn = create_classes_mapper ):
+
+
+def main(args, create_classes_mapper_fn=create_classes_mapper):
     train_set = None
     test_set = None
 
@@ -222,7 +224,8 @@ def main(args, create_classes_mapper_fn = create_classes_mapper ):
 
     try:
         train_set, test_set = load_files(
-            args.input_images_source, args.train_val_split_ratio, args.task, args.project_type
+            args.input_images_source, args.train_val_split_ratio, args.task,
+            args.project_type
         )
     except Exception as e:
         logging.error(
@@ -252,6 +255,7 @@ def main(args, create_classes_mapper_fn = create_classes_mapper ):
             logging.error(e)
             sys.exit()
 
+    num_converted = converter.strategy.num_converted
     converter.strategy.set_dataset_name(args.dataset_name + '_test')
     converter.strategy.set_export_root(
         os.path.join(args.output_dir, 'test_set')
@@ -268,6 +272,7 @@ def main(args, create_classes_mapper_fn = create_classes_mapper ):
             sys.exit()
 
     logging.info('Conversion completed successfully')
+
 
 if __name__ == '__main__':
     args = parse_args()

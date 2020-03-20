@@ -23,6 +23,32 @@ classes_dir = os.path.join(sa_folder, "classes")
 if not os.path.exists(classes_dir):
     os.mkdir(classes_dir)
 
+
+# Converts RGB values to HEX values
+def rgb_to_hex(rgb_tuple):
+    return '#%02x%02x%02x' % rgb_tuple
+
+
+# Generates tuples of Pascal VOC's default colors and classes
+def color_class_tuples():
+    voc_colormap = []
+    voc_colormap_rgb = [(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
+                        (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128),
+                        (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
+                        (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
+                        (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0),
+                        (0, 64, 128)]
+    for cmap in voc_colormap_rgb:
+        voc_colormap.append(rgb_to_hex(cmap))
+
+    voc_classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
+                   'bottle', 'bus', 'car', 'cat', 'chair', 'cow',
+                   'diningtable', 'dog', 'horse', 'motorbike', 'person',
+                   'potted plant', 'sheep', 'sofa', 'train', 'tv/monitor']
+
+    return [(voc_colormap[i], voc_classes[i]) for i in range(0, len(voc_colormap))]
+
+
 pvoc_jsons = []
 classes = set()
 for root, dirs, files in os.walk(pvoc_folder, topdown=True):
@@ -53,14 +79,20 @@ for root, dirs, files in os.walk(pvoc_folder, topdown=True):
 # with open(os.path.join(os.path.abspath(pvoc_folder), "general_pvoc.json"), "w") as gen_pvoc_json:
 #     json.dump(pvoc_jsons, gen_pvoc_json, indent=2)
 
+
 sa_classes = []
 for c in list(classes):
     sa_class = {
         "id": list(classes).index(c) + 1,
         "name": c,
-        "color": "#000000",  # ?
+        "color": "#000000",
         "attribute_groups": []
       }
+
+    for pv_color, pv_class in color_class_tuples():
+        if sa_class['name'] == pv_class:
+            sa_class['color'] = pv_color
+
     sa_classes.append(sa_class)
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(sa_classes, classes_json, indent=2)

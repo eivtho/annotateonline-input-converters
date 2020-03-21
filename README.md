@@ -110,7 +110,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *Example*
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_pixel_panoptic_segm -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
 
 ```
 
@@ -126,14 +126,14 @@ If your project is of type  'vector' then you will need all your images their co
 *Example*
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_pixel_instance_segm -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_inst -cp True
 
 ```
 
 Projects that have type vector with polygon annotations can still be converted to coco format 
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_polygons -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_instance_segm -sr 80 -ptype vector -t instance_segmentation -dn test_instance -od output_inst -cp True
 
 ```
 
@@ -151,7 +151,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 *Example*
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -ptype pixel -t instance_segmentation -dn test_keypoint -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_det -sr 80 -ptype vector -t keypoint_detection -dn test_keyp -od output_keyp -cp True
 
 ```
 

@@ -1,8 +1,10 @@
 import os
+import cv2
 import json
 import shutil
 import argparse
 import xmltodict
+import numpy as np
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -11,17 +13,28 @@ parser.add_argument(
     required=True,
     help="Path of the directory, which contains all output data of Pascal VOC"
 )
+parser.add_argument('-v',
+                    action='store_true',
+                    help="Set true if you need annotate.online's vector format annotations")
+
+parser.add_argument('-p',
+                    action='store_true',
+                    help="Set true if you need annotate.online's pixel format annotations")
 p = parser.parse_args()
 
 pvoc_folder = p.pvoc_dir
+vector_format = p.v
+pixel_format = p.p
 
-sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted")
-if not os.path.exists(sa_folder):
-    os.mkdir(sa_folder)
+if vector_format:
+    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_vector")
+elif pixel_format:
+    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_pixel")
+
+os.makedirs(sa_folder, exist_ok=True)
 
 classes_dir = os.path.join(sa_folder, "classes")
-if not os.path.exists(classes_dir):
-    os.mkdir(classes_dir)
+os.makedirs(classes_dir, exist_ok=True)
 
 
 # Converts RGB values to HEX values
@@ -75,15 +88,21 @@ for root, dirs, files in os.walk(pvoc_folder, topdown=True):
                 os.path.join(sa_folder, file_name)
             )
 
+        if pixel_format and file_name.endswith('.png') and 'SegmentationObject' in root:
+            shutil.copyfile(
+                os.path.join(root, file_name),
+                os.path.join(sa_folder, file_name)
+            )
+
 # Just in case if you want to see Pascal VOC's JSON objects converted from xml and collected in single JSON file
 # with open(os.path.join(os.path.abspath(pvoc_folder), "general_pvoc.json"), "w") as gen_pvoc_json:
 #     json.dump(pvoc_jsons, gen_pvoc_json, indent=2)
 
 
 sa_classes = []
-for c in list(classes):
+for i, c in enumerate(classes):
     sa_class = {
-        "id": list(classes).index(c) + 1,
+        "id": i + 1,
         "name": c,
         "color": "#000000",
         "attribute_groups": []
@@ -99,39 +118,56 @@ with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
 
 for pv_json in pvoc_jsons:
     sa_loader = []
-    for obj in pv_json['annotation']['object']:
+    if vector_format:
+        for obj in pv_json['annotation']['object']:
 
-        sa_bbox = {
-                'type': 'bbox',
-                'points':
-                        {
-                            'x1': obj['bndbox']['xmin'],
-                            'y1': obj['bndbox']['ymin'],
-                            'x2': obj['bndbox']['xmax'],
-                            'y2': obj['bndbox']['ymax']
-                        },
-                'className': obj['name'],
-                'classId': '',
-                'attributes': [],
-                'probability': 100,
-                'locked': False,
-                'visible': True,
-                'groupId': 0
-            }
+            sa_bbox = {
+                    'type': 'bbox',
+                    'points':
+                            {
+                                'x1': obj['bndbox']['xmin'],
+                                'y1': obj['bndbox']['ymin'],
+                                'x2': obj['bndbox']['xmax'],
+                                'y2': obj['bndbox']['ymax']
+                            },
+                    'className': obj['name'],
+                    'classId': '',
+                    'attributes': [],
+                    'probability': 100,
+                    'locked': False,
+                    'visible': True,
+                    'groupId': 0
+                }
 
-        if 'actions' in obj.keys():
-            for act_key, act_value in obj['actions'].items():
-                sa_bbox['attributes'].append({'id': -1, 'groupId': -2, act_key: act_value})
+            if 'actions' in obj.keys():
+                for act_key, act_value in obj['actions'].items():
+                    sa_bbox['attributes'].append({'id': -1, 'groupId': -2, act_key: act_value})
 
-        for key, value in obj.items():
-            if key not in ['name', 'bndbox', 'point', 'actions']:
-                sa_bbox['attributes'].append({'id': -1, 'groupId': -2, key: value})
+            for key, value in obj.items():
+                if key not in ['name', 'bndbox', 'point', 'actions']:
+                    sa_bbox['attributes'].append({'id': -1, 'groupId': -2, key: value})
 
-        for sa_class in sa_classes:
-            if sa_class['name'] == sa_bbox['className']:
-                sa_bbox['classId'] = sa_class['id']
+            for sa_class in sa_classes:
+                if sa_class['name'] == sa_bbox['className']:
+                    sa_bbox['classId'] = sa_class['id']
 
-        sa_loader.append(sa_bbox)
+            sa_loader.append(sa_bbox)
 
-    with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___objects.json"), "w") as new_json:
-        json.dump(sa_loader, new_json, indent=2)
+        with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___objects.json"), "w") as new_json:
+            json.dump(sa_loader, new_json, indent=2)
+
+    elif pixel_format:
+        for obj in pv_json['annotation']['object']:
+            sa_dict = {
+                            'classId': '?',
+                            'probability': 100,
+                            'parts':
+                                [{
+                                    'color': '?'
+                                }],
+                            'attributes': [],
+                            'attributeNames': []
+                        }
+            sa_loader.append(sa_dict)
+        with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___pixel.json"), "w") as new_json:
+            json.dump(sa_loader, new_json, indent=2)

@@ -13,114 +13,78 @@ parser.add_argument(
     required=True,
     help="Path of the directory, which contains all output data of Pascal VOC"
 )
-parser.add_argument('-v',
+parser.add_argument('-fd',
                     action='store_true',
-                    help="Set true if you need annotate.online's vector format annotations")
+                    help="Set if you want to convert from VOC's detection format")
 
-parser.add_argument('-p',
+parser.add_argument('-fs',
                     action='store_true',
-                    help="Set true if you need annotate.online's pixel format annotations")
+                    help="Set if you want to convert from VOC's segmentation format")
 p = parser.parse_args()
 
 pvoc_folder = p.pvoc_dir
-vector_format = p.v
-pixel_format = p.p
+from_detection = p.fd
+from_segmentation = p.fs
 
-if vector_format:
-    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_vector")
-elif pixel_format:
-    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_pixel")
-
-os.makedirs(sa_folder, exist_ok=True)
-
-classes_dir = os.path.join(sa_folder, "classes")
-os.makedirs(classes_dir, exist_ok=True)
+if from_detection:
+    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_from_detection")
+    os.makedirs(sa_folder, exist_ok=True)
+elif from_segmentation:
+    sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted_from_segmentation")
+    os.makedirs(sa_folder, exist_ok=True)
 
 
-# Converts RGB values to HEX values
-def rgb_to_hex(rgb_tuple):
-    return '#%02x%02x%02x' % rgb_tuple
+# Generates polygons for each instance
+def generate_polygons(png_file):
+    segmentation = []
+
+    img = cv2.imread(png_file, cv2.IMREAD_GRAYSCALE)
+    img_unique_colors = np.unique(img)
+
+    for unique_color in img_unique_colors:
+        if unique_color == 0 or unique_color == 220:
+            continue
+        else:
+            mask = np.zeros_like(img)
+            mask[img == unique_color] = 255
+            contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            for contour in contours:
+                contour = contour.flatten().tolist()
+                if len(contour) > 4:
+                    segmentation.append((contour, unique_color))
+                if len(segmentation) == 0:
+                    continue
+    return segmentation
 
 
-# Generates tuples of Pascal VOC's default colors and classes
-def color_class_tuples():
-    voc_colormap = []
-    voc_colormap_rgb = [(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0),
-                        (0, 0, 128), (128, 0, 128), (0, 128, 128), (128, 128, 128),
-                        (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0),
-                        (64, 0, 128), (192, 0, 128), (64, 128, 128), (192, 128, 128),
-                        (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0),
-                        (0, 64, 128)]
-    for cmap in voc_colormap_rgb:
-        voc_colormap.append(rgb_to_hex(cmap))
+def from_voc_detection():
+    pvoc_dicts = []
+    classes = set()
+    for root, dirs, files in os.walk(pvoc_folder, topdown=True):
+        for file_name in files:
+            if file_name.endswith('xml'):
+                pvoc_dict = xmltodict.parse(open(os.path.join(root, file_name)).read())
+                obj_list = []
+                if not isinstance(pvoc_dict['annotation']['object'], list):
+                    obj_list.append(pvoc_dict['annotation']['object'])
+                    pvoc_dict['annotation']['object'] = obj_list
+                pvoc_dicts.append(pvoc_dict)
 
-    voc_classes = ['background', 'aeroplane', 'bicycle', 'bird', 'boat',
-                   'bottle', 'bus', 'car', 'cat', 'chair', 'cow',
-                   'diningtable', 'dog', 'horse', 'motorbike', 'person',
-                   'potted plant', 'sheep', 'sofa', 'train', 'tv/monitor']
+                if isinstance(pvoc_dict['annotation']['object'], list):
+                    for obj in pvoc_dict['annotation']['object']:
+                        classes.add(obj['name'])
+                else:
+                    classes.add(pvoc_dict['annotation']['object']['name'])
 
-    return [(voc_colormap[i], voc_classes[i]) for i in range(0, len(voc_colormap))]
+            if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):
+                shutil.copyfile(
+                    os.path.join(root, file_name),
+                    os.path.join(sa_folder, file_name)
+                )
 
-
-pvoc_jsons = []
-classes = set()
-for root, dirs, files in os.walk(pvoc_folder, topdown=True):
-    for file_name in files:
-        if file_name.endswith('xml'):
-            xml = file_name
-            pvoc_json = eval(json.dumps(xmltodict.parse(open(os.path.join(root, file_name)).read())))
-
-            obj_list = []
-            if not isinstance(pvoc_json['annotation']['object'], list):
-                obj_list.append(pvoc_json['annotation']['object'])
-                pvoc_json['annotation']['object'] = obj_list
-            pvoc_jsons.append(pvoc_json)
-
-            if isinstance(pvoc_json['annotation']['object'], list):
-                for obj in pvoc_json['annotation']['object']:
-                    classes.add(obj['name'])
-            else:
-                classes.add(pvoc_json['annotation']['object']['name'])
-
-        if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):
-            shutil.copyfile(
-                os.path.join(root, file_name),
-                os.path.join(sa_folder, file_name)
-            )
-
-        if pixel_format and file_name.endswith('.png') and 'SegmentationObject' in root:
-            shutil.copyfile(
-                os.path.join(root, file_name),
-                os.path.join(sa_folder, file_name)
-            )
-
-# Just in case if you want to see Pascal VOC's JSON objects converted from xml and collected in single JSON file
-# with open(os.path.join(os.path.abspath(pvoc_folder), "general_pvoc.json"), "w") as gen_pvoc_json:
-#     json.dump(pvoc_jsons, gen_pvoc_json, indent=2)
-
-
-sa_classes = []
-for i, c in enumerate(classes):
-    sa_class = {
-        "id": i + 1,
-        "name": c,
-        "color": "#000000",
-        "attribute_groups": []
-      }
-
-    for pv_color, pv_class in color_class_tuples():
-        if sa_class['name'] == pv_class:
-            sa_class['color'] = pv_color
-
-    sa_classes.append(sa_class)
-with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
-    json.dump(sa_classes, classes_json, indent=2)
-
-for pv_json in pvoc_jsons:
-    sa_loader = []
-    if vector_format:
-        for obj in pv_json['annotation']['object']:
-
+    for pv_dict in pvoc_dicts:
+        sa_loader = []
+        for obj in pv_dict['annotation']['object']:
             sa_bbox = {
                     'type': 'bbox',
                     'points':
@@ -147,27 +111,79 @@ for pv_json in pvoc_jsons:
                 if key not in ['name', 'bndbox', 'point', 'actions']:
                     sa_bbox['attributes'].append({'id': -1, 'groupId': -2, key: value})
 
-            for sa_class in sa_classes:
-                if sa_class['name'] == sa_bbox['className']:
-                    sa_bbox['classId'] = sa_class['id']
+            for i, sa_class in enumerate(classes):
+                if sa_class == sa_bbox['className']:
+                    sa_bbox['classId'] = -1 * (i + 1)
 
             sa_loader.append(sa_bbox)
 
-        with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___objects.json"), "w") as new_json:
+        with open(os.path.join(sa_folder, pv_dict['annotation']['filename'] + "___objects.json"), "w") as new_json:
             json.dump(sa_loader, new_json, indent=2)
 
-    elif pixel_format:
-        for obj in pv_json['annotation']['object']:
-            sa_dict = {
-                            'classId': '?',
-                            'probability': 100,
-                            'parts':
-                                [{
-                                    'color': '?'
-                                }],
-                            'attributes': [],
-                            'attributeNames': []
-                        }
-            sa_loader.append(sa_dict)
-        with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___pixel.json"), "w") as new_json:
-            json.dump(sa_loader, new_json, indent=2)
+
+def from_voc_segmentation():
+    classes = set()
+    sa_loader = []
+    bad_annotations = set()
+
+    for file in os.listdir(os.path.join(pvoc_folder, 'SegmentationClass')):
+        voc_class = generate_polygons(os.path.join(os.path.join(pvoc_folder, 'SegmentationClass'), file))
+        for segment, color in voc_class:
+            classes.add(color)
+
+    for root, dirs, files in os.walk(pvoc_folder, topdown=True):
+        for file_name in files:
+
+            original_file_name = ''
+
+            if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):
+                original_file_name = file_name
+                shutil.copyfile(
+                    os.path.join(root, file_name),
+                    os.path.join(sa_folder, file_name)
+                )
+
+            if 'SegmentationObject' in root:
+                voc_masks = generate_polygons(os.path.join(root, file_name))
+                voc_class_masks = generate_polygons(os.path.join(root.replace('SegmentationObject', 'SegmentationClass'), file_name))
+
+                for i, j in enumerate(voc_masks):
+                    sa_polygon = {
+                                        'type': 'polygon',
+                                        'points': j[0],
+                                        'className': '',
+                                        'classId': 111,
+                                        'attributes': [],
+                                        'probability': 100,
+                                        'locked': False,
+                                        'visible': True,
+                                        'groupId': 0,
+                                        'imageId': file_name.split('.')[0]
+                                    }
+                    if len(voc_masks) != len(voc_class_masks):  # this statement for merged classes
+                        bad_annotations.add(file_name)
+                        continue
+                    else:
+                        if voc_class_masks[i][0] == j[0] and voc_class_masks[i][1] in classes:
+                            sa_polygon['classId'] = -1 * (list(classes).index(voc_class_masks[i][1]) + 1)
+                        else:
+                            bad_annotations.add(file_name)
+
+                    sa_loader.append(sa_polygon)
+
+            f_loader = []
+            for data in sa_loader:
+                if data['imageId'] == original_file_name.split('.')[0]:
+                    f_loader.append(data)
+                    with open(os.path.join(sa_folder,  original_file_name + "___objects.json"), "w") as new_json:
+                        json.dump(f_loader, new_json, indent=2)
+
+    print(f'List of bad annotated files = {bad_annotations}')
+
+
+if from_detection:
+    from_voc_detection()
+elif from_segmentation:
+    from_voc_segmentation()
+
+

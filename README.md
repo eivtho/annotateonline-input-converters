@@ -155,6 +155,34 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_de
 
 ```
 
+### Tesseract OCR, with convertion to annotate.online
+
+**Note** : 'ocreval' metric was used for evaluation of accuracy. Make shure you have installed it before running. (https://github.com/eddieantonio/ocreval) 
+
+*please note*: 'tesseract_converters' folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the 'run_api.py' modify "DATA_PATH" variable. Test datasets exist on 'bus.4B' folder from isri-ocr-evolution-tools project (https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
+
+```
+python3 run_api.py 
+```
+
+*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
+
+```
+Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
+[--verbose {0,1,2}]
+```
+```
+optional arguments:
+  -h, --help         show this help message and exit
+  --input INPUT      Path to input files or folder with tesseract dict format.
+                     File name structure [IMAGE_NAME]___tess.json
+  --output OUTPUT    Path to output folder. File name structure
+                     [IMAGE_NAME]___objects.json
+  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
+                     converted files, 2 -- Prints number of converted files
+                     and unconverted files path.
+```
+
 ## Contact
 
 For questions please contact Hovnatan Karapetyan at `hovnatan at superannotate.com`.

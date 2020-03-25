@@ -31,25 +31,28 @@ def get_parser():
 
 
 # Generates polygons for each instance
-def generate_polygons(png_file):
+def generate_polygons(object_mask_path, class_mask_path):
     segmentation = []
 
-    img = cv2.imread(png_file, cv2.IMREAD_GRAYSCALE)
-    img_unique_colors = np.unique(img)
+    object_mask = cv2.imread(object_mask_path, cv2.IMREAD_GRAYSCALE)
+    class_mask = cv2.imread(class_mask_path, cv2.IMREAD_GRAYSCALE)
 
-    for unique_color in img_unique_colors:
+    object_unique_colors = np.unique(object_mask)
+
+    for unique_color in object_unique_colors:
         if unique_color == 0 or unique_color == 220:
             continue
         else:
-            mask = np.zeros_like(img)
-            mask[img == unique_color] = 255
+            class_color = class_mask[object_mask == unique_color][0]
+            mask = np.zeros_like(object_mask)
+            mask[object_mask == unique_color] = 255
             contours, _ = cv2.findContours(
                 mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
             for contour in contours:
                 contour = contour.flatten().tolist()
                 if len(contour) > 4:
-                    segmentation.append((contour, unique_color))
+                    segmentation.append((contour, class_color))
                 if len(segmentation) == 0:
                     continue
     return segmentation
@@ -129,74 +132,36 @@ def from_voc_detection():
 # Converts VOC segmentation format to annotate.online's vector format
 def from_voc_segmentation():
     classes = set()
-    sa_loader = []
-    bad_annotations = set()
 
-    for file in os.listdir(os.path.join(pvoc_folder, 'SegmentationClass')):
-        voc_class = generate_polygons(
-            os.path.join(os.path.join(pvoc_folder, 'SegmentationClass'), file)
+    object_masks_dir = os.path.join(pvoc_folder, 'SegmentationObject')
+    class_masks_dir = os.path.join(pvoc_folder, 'SegmentationClass')
+
+    for filename in os.listdir(object_masks_dir):
+        sa_loader = []
+
+        ploygon_instances = generate_polygons(
+            os.path.join(object_masks_dir, filename),
+            os.path.join(class_masks_dir, filename)
         )
-        for segment, color in voc_class:
-            classes.add(color)
 
-    for root, dirs, files in os.walk(pvoc_folder, topdown=True):
-        for file_name in files:
+        for polygon, color_id in ploygon_instances:
+            classes.add(color_id)
+            sa_polygon = {
+                'type': 'polygon',
+                'points': polygon,
+                'classId': -1 * (list(classes).index(color_id) + 1),
+                'attributes': [],
+                'probability': 100,
+                'locked': False,
+                'visible': True,
+                'groupId': 0
+            }
+            sa_loader.append(sa_polygon)
 
-            original_file_name = ''
-
-            if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):
-                original_file_name = file_name
-
-            if 'SegmentationObject' in root:
-                voc_masks = generate_polygons(os.path.join(root, file_name))
-                voc_class_masks = generate_polygons(
-                    os.path.join(
-                        root.replace('SegmentationObject', 'SegmentationClass'),
-                        file_name
-                    )
-                )
-
-                for i, j in enumerate(voc_masks):
-                    sa_polygon = {
-                        'type': 'polygon',
-                        'points': j[0],
-                        'className': '',
-                        'classId': 111,
-                        'attributes': [],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': 0,
-                        'imageId': file_name.split('.')[0]
-                    }
-                    if len(voc_masks) != len(
-                        voc_class_masks
-                    ):  # this statement for merged classes
-                        bad_annotations.add(file_name)
-                        continue
-                    else:
-                        if voc_class_masks[i][0] == j[0] and voc_class_masks[i][
-                            1] in classes:
-                            sa_polygon['classId'] = -1 * (
-                                list(classes).index(voc_class_masks[i][1]) + 1
-                            )
-                        else:
-                            bad_annotations.add(file_name)
-
-                    sa_loader.append(sa_polygon)
-
-            f_loader = []
-            for data in sa_loader:
-                if data['imageId'] == original_file_name.split('.')[0]:
-                    f_loader.append(data)
-                    with open(
-                        os.path.join(
-                            sa_folder, original_file_name + "___objects.json"
-                        ), "w"
-                    ) as new_json:
-                        json.dump(f_loader, new_json, indent=2)
-
-    print(f'List of bad annotated files = {bad_annotations}')
+        with open(
+            os.path.join(sa_folder, filename + "___objects.json"), "w"
+        ) as new_json:
+            json.dump(sa_loader, new_json, indent=2)
 
 
 if __name__ == "__main__":
@@ -212,7 +177,7 @@ if __name__ == "__main__":
 
         from_voc_detection()
 
-    elif from_segmentation:
+    if from_segmentation:
         sa_folder = os.path.abspath(
             pvoc_folder
         ) + "__converted_from_segmentation"

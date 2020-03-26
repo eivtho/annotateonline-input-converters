@@ -159,7 +159,10 @@ def from_voc_segmentation():
             sa_loader.append(sa_polygon)
 
         with open(
-            os.path.join(sa_folder, filename + "___objects.json"), "w"
+            os.path.join(
+                sa_folder,
+                filename.replace('.png', '.jpg') + "___objects.json"
+            ), "w"
         ) as new_json:
             json.dump(sa_loader, new_json, indent=2)
 

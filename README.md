@@ -155,6 +155,50 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -
 
 ```
 
+### *From* Pascal VOC output *to* annotate.online input format
+
+All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
+
+*please note*: We only support conversion from Pascal VOC format to annotate.online's vector format!
+```
+usage: pascalvoc_to_sa.py [-h] --pvoc-dir PVOC_DIR [-fd] [-fs]
+```
+```
+optional arguments:
+  -h, --help           show this help message and exit
+  --pvoc-dir PVOC_DIR  Path of the directory, which contains all output data
+                       of Pascal VOC
+  -fd                  Set if you want to convert from VOC's detection format
+  -fs                  Set if you want to convert from VOC's segmentation
+                       format
+```
+
+##### *From* VOC detection format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only bboxes.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
+```
+
+##### *From* VOC segmentation format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only polygons.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
+```
+
 ## Contact
 
 For questions please contact Hovnatan Karapetyan at `hovnatan at superannotate.com`.

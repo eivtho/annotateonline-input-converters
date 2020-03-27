@@ -1,112 +1,189 @@
 import os
+import cv2
 import json
-import shutil
 import argparse
 import xmltodict
+import numpy as np
 
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--pvoc-dir",
-    type=str,
-    required=True,
-    help="Path of the directory, which contains all output data of Pascal VOC"
-)
-p = parser.parse_args()
 
-pvoc_folder = p.pvoc_dir
+# Defines parser for cmd arguments
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pvoc-dir",
+        type=str,
+        required=True,
+        help="Path of the directory, which contains all output data of Pascal VOC"
+    )
+    parser.add_argument(
+        '-fd',
+        action='store_true',
+        help="Set if you want to convert from VOC's detection format"
+    )
 
-sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted")
-if not os.path.exists(sa_folder):
-    os.mkdir(sa_folder)
+    parser.add_argument(
+        '-fs',
+        action='store_true',
+        help="Set if you want to convert from VOC's segmentation format"
+    )
 
-classes_dir = os.path.join(sa_folder, "classes")
-if not os.path.exists(classes_dir):
-    os.mkdir(classes_dir)
+    return parser
 
-pvoc_jsons = []
-classes = set()
-for root, dirs, files in os.walk(pvoc_folder, topdown=True):
-    for file_name in files:
-        if file_name.endswith('xml'):
-            xml = file_name
-            pvoc_json = eval(json.dumps(xmltodict.parse(open(os.path.join(root, file_name)).read())))
-            pvoc_jsons.append(pvoc_json)
 
-            if isinstance(pvoc_json['annotation']['object'], list):
-                for obj in pvoc_json['annotation']['object']:
-                    classes.add(obj['name'])
-            else:
-                classes.add(pvoc_json['annotation']['object']['name'])
+# Generates polygons for each instance
+def generate_polygons(object_mask_path, class_mask_path):
+    segmentation = []
 
-        if file_name.endswith('.jpg') or file_name.endswith('.jpeg'):
-            shutil.copyfile(
-                os.path.join(root, file_name),
-                os.path.join(sa_folder, file_name)
+    object_mask = cv2.imread(object_mask_path, cv2.IMREAD_GRAYSCALE)
+    class_mask = cv2.imread(class_mask_path, cv2.IMREAD_GRAYSCALE)
+
+    object_unique_colors = np.unique(object_mask)
+
+    for unique_color in object_unique_colors:
+        if unique_color == 0 or unique_color == 220:
+            continue
+        else:
+            class_color = class_mask[object_mask == unique_color][0]
+            mask = np.zeros_like(object_mask)
+            mask[object_mask == unique_color] = 255
+            contours, _ = cv2.findContours(
+                mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
             )
+            for contour in contours:
+                contour = contour.flatten().tolist()
+                if len(contour) > 4:
+                    segmentation.append((contour, class_color))
+                if len(segmentation) == 0:
+                    continue
+    return segmentation
 
-sa_classes = []
-for c in list(classes):
-    sa_class = {
-        "id": list(classes).index(c) + 1,
-        "name": c,
-        "color": "#000000",  # ?
-        "attribute_groups": []
-      }
-    sa_classes.append(sa_class)
-with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
-    json.dump(sa_classes, classes_json, indent=2)
 
-for pv_json in pvoc_jsons:
-    sa_loader = []
-    if isinstance(pv_json['annotation']['object'], list):
-        for obj in pv_json['annotation']['object']:
-            try:
-                sa_bbox = {
-                        'type': 'bbox',
-                        'points':
-                                {
-                                    'x1': obj['bndbox']['xmin'],
-                                    'y1': obj['bndbox']['ymin'],
-                                    'x2': obj['bndbox']['xmax'],
-                                    'y2': obj['bndbox']['ymax']
-                                },
-                        'className': obj['name'],
-                        'classId': '?',
-                        'attributes': [{'pose': obj['pose'],
-                                        'truncated': obj['truncated'],
-                                        'difficult': obj['difficult']}],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': 0
-                    }
-                sa_loader.append(sa_bbox)
-            except KeyError:
-                print('KeyError')
-    else:
-        try:
+# Converts VOC detection format to annotate.online's vector format
+def from_voc_detection():
+
+    classes = set()
+
+    for xml_file in os.listdir(os.path.join(pvoc_folder, 'Annotations')):
+        voc_dict = xmltodict.parse(
+            open(os.path.join(pvoc_folder, 'Annotations', xml_file)).read()
+        )
+        obj_list = []
+        if not isinstance(voc_dict['annotation']['object'], list):
+            obj_list.append(voc_dict['annotation']['object'])
+            voc_dict['annotation']['object'] = obj_list
+
+        if isinstance(voc_dict['annotation']['object'], list):
+            for obj in voc_dict['annotation']['object']:
+                classes.add(obj['name'])
+        else:
+            classes.add(voc_dict['annotation']['object']['name'])
+
+        sa_loader = []
+        for obj in voc_dict['annotation']['object']:
             sa_bbox = {
-                        'type': 'bbox',
-                        'points':
-                                {
-                                    'x1': pv_json['annotation']['object']['bndbox']['xmin'],
-                                    'y1': pv_json['annotation']['object']['bndbox']['ymin'],
-                                    'x2': pv_json['annotation']['object']['bndbox']['xmax'],
-                                    'y2': pv_json['annotation']['object']['bndbox']['ymax']
-                                },
-                        'className': pv_json['annotation']['object']['name'],
-                        'classId': '?',
-                        'attributes': [{'pose': pv_json['annotation']['object']['pose'],
-                                        'truncated': pv_json['annotation']['object']['truncated'],
-                                        'difficult': pv_json['annotation']['object']['difficult']}],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': 0
-                    }
-            sa_loader.append(sa_bbox)
-        except KeyError:
-            print("KeyError")
+                'type': 'bbox',
+                'points':
+                    {
+                        'x1': obj['bndbox']['xmin'],
+                        'y1': obj['bndbox']['ymin'],
+                        'x2': obj['bndbox']['xmax'],
+                        'y2': obj['bndbox']['ymax']
+                    },
+                'className': obj['name'],
+                'classId': -1 * (list(classes).index(obj['name']) + 1),
+                'attributes': [],
+                'probability': 100,
+                'locked': False,
+                'visible': True,
+                'groupId': 0
+            }
 
-    with open(os.path.join(sa_folder, pv_json['annotation']['filename'] + "___objects.json"), "w") as new_json:
-        json.dump(sa_loader, new_json, indent=2)
+            if 'actions' in obj.keys():
+                for act_key, act_value in obj['actions'].items():
+                    sa_bbox['attributes'].append(
+                        {
+                            'id': -1,
+                            'groupId': -2,
+                            act_key: act_value
+                        }
+                    )
+
+            for key, value in obj.items():
+                if key not in ['name', 'bndbox', 'point', 'actions']:
+                    sa_bbox['attributes'].append(
+                        {
+                            'id': -1,
+                            'groupId': -2,
+                            key: value
+                        }
+                    )
+
+            sa_loader.append(sa_bbox)
+
+        with open(
+            os.path.join(
+                sa_folder,
+                voc_dict['annotation']['filename'] + "___objects.json"
+            ), "w"
+        ) as new_json:
+            json.dump(sa_loader, new_json, indent=2)
+
+
+# Converts VOC segmentation format to annotate.online's vector format
+def from_voc_segmentation():
+    classes = set()
+
+    object_masks_dir = os.path.join(pvoc_folder, 'SegmentationObject')
+    class_masks_dir = os.path.join(pvoc_folder, 'SegmentationClass')
+
+    for filename in os.listdir(object_masks_dir):
+        sa_loader = []
+
+        ploygon_instances = generate_polygons(
+            os.path.join(object_masks_dir, filename),
+            os.path.join(class_masks_dir, filename)
+        )
+
+        for polygon, color_id in ploygon_instances:
+            classes.add(color_id)
+            sa_polygon = {
+                'type': 'polygon',
+                'points': polygon,
+                'classId': -1 * (list(classes).index(color_id) + 1),
+                'attributes': [],
+                'probability': 100,
+                'locked': False,
+                'visible': True,
+                'groupId': 0
+            }
+            sa_loader.append(sa_polygon)
+
+        with open(
+            os.path.join(
+                sa_folder,
+                filename.replace('.png', '.jpg') + "___objects.json"
+            ), "w"
+        ) as new_json:
+            json.dump(sa_loader, new_json, indent=2)
+
+
+if __name__ == "__main__":
+    p = get_parser().parse_args()
+
+    pvoc_folder = p.pvoc_dir
+    from_detection = p.fd
+    from_segmentation = p.fs
+
+    if from_detection:
+        sa_folder = os.path.abspath(pvoc_folder) + "__converted_from_detection"
+        os.makedirs(sa_folder, exist_ok=True)
+
+        from_voc_detection()
+
+    if from_segmentation:
+        sa_folder = os.path.abspath(
+            pvoc_folder
+        ) + "__converted_from_segmentation"
+        os.makedirs(sa_folder, exist_ok=True)
+
+        from_voc_segmentation()

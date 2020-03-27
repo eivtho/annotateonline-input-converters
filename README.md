@@ -34,7 +34,7 @@ optional arguments:
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
 ```
 
 **Note**: This command will create new `instances_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
@@ -45,7 +45,7 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
 **Note**: This command will create new `person_keypoints_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
@@ -58,7 +58,7 @@ which will contain panoptic segmentation's png masks.
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
 ```
 
 **Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
@@ -183,7 +183,7 @@ python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
 *Example*
 
 ```
-python3 pascalvoc_to_sa.py --pvoc-dir tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
 ```
 
 ##### *From* VOC segmentation format *to* annotate.online vector format
@@ -196,7 +196,7 @@ python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
 *Example*
 
 ```
-python3 pascalvoc_to_sa.py --pvoc-dir tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
 ```
 
 ## Contact

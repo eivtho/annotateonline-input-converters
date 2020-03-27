@@ -1,0 +1,13 @@
+  438   426   440   134 Letterhead
+  378   846   500    86 Dateline
+  398  1124   648   206 Inside_Addr
+  398  1330   524    78 Attent_line
+  378  1578   908   158 Subject
+  384  1788   380    68 Salutat
+  384  1908  2666   380 Text
+  384  2310   272    98 Closing
+  384  2442   824    98 Company_Sig
+  390  2778  1016   152 Signer
+  390  2976   146    86 Sign/Type
+  372  3102   290   104 Enclosure
+  372  3246   302    92 cc

@@ -34,7 +34,7 @@ optional arguments:
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
 ```
 
 **Note**: This command will create new `instances_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
@@ -45,11 +45,11 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
-**Note**: This command will create new `person_keypoints_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
+**Note**: This command will create new `person_keypoints_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
+in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Panoptic segmentation**
 
@@ -58,13 +58,13 @@ which will contain panoptic segmentation's png masks.
 
 *Example*
 ```
-    python3 ./coco_to_sa.py --coco-json ./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
 ```
 
-**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
+**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format and then will rename and move png masks
-from `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
-in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
+from `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
+in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
 
 ### *From* annotate.online output *to* COCO input format
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
@@ -181,6 +181,50 @@ optional arguments:
   --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
                      converted files, 2 -- Prints number of converted files
                      and unconverted files path.
+```
+
+### *From* Pascal VOC output *to* annotate.online input format
+
+All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
+
+*please note*: We only support conversion from Pascal VOC format to annotate.online's vector format!
+```
+usage: pascalvoc_to_sa.py [-h] --pvoc-dir PVOC_DIR [-fd] [-fs]
+```
+```
+optional arguments:
+  -h, --help           show this help message and exit
+  --pvoc-dir PVOC_DIR  Path of the directory, which contains all output data
+                       of Pascal VOC
+  -fd                  Set if you want to convert from VOC's detection format
+  -fs                  Set if you want to convert from VOC's segmentation
+                       format
+```
+
+##### *From* VOC detection format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only bboxes.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
+```
+
+##### *From* VOC segmentation format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only polygons.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
 ```
 
 ## Contact

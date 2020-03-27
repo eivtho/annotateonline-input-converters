@@ -219,7 +219,7 @@ python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToA
 ```
 python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
 ```
-**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only polygons.
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC detection format, which means there will be only polygons.
 
 *Example*
 

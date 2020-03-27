@@ -47,9 +47,9 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
-**Note**: This command will create new `person_keypoints_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
+**Note**: This command will create new `person_keypoints_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
+in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
 
 ##### **Panoptic segmentation**
 
@@ -61,10 +61,10 @@ which will contain panoptic segmentation's png masks.
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
 ```
 
-**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
+**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format and then will rename and move png masks
-from `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
-in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
+from `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
+in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
 
 ### *From* annotate.online output *to* COCO input format
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
@@ -110,7 +110,7 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype pixel -t panoptic_
 
 *Example*
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_pixel_panoptic_segm -sr 80 -ptype pixel -t panoptic_segmentation -dn test_panoptic -od output_pan -cp True
 
 ```
 
@@ -126,14 +126,14 @@ If your project is of type  'vector' then you will need all your images their co
 *Example*
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_pixel_instance_segm -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_inst -cp True
 
 ```
 
 Projects that have type vector with polygon annotations can still be converted to coco format 
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_polygons -sr 80 -ptype pixel -t instance_segmentation -dn test_instance -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_instance_segm -sr 80 -ptype vector -t instance_segmentation -dn test_instance -od output_inst -cp True
 
 ```
 
@@ -151,26 +151,36 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 *Example*
 
 ```
-python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_templates -sr 80 -ptype pixel -t instance_segmentation -dn test_keypoint -od output_pan -cp True
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_det -sr 80 -ptype vector -t keypoint_detection -dn test_keyp -od output_keyp -cp True
 
 ```
 
-### *From* Pascal VOC output *to* annotate.online input format
+### Tesseract OCR, with convertion to annotate.online
 
-All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
+**Note** : 'ocreval' metric was used for evaluation of accuracy. Make shure you have installed it before running. (https://github.com/eddieantonio/ocreval) 
 
-*please note*: We only support conversion from Pascal VOC format to annotate.online's vector format!
+*please note*: 'tesseract_converters' folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the 'run_api.py' modify "DATA_PATH" variable. Test datasets exist on 'bus.4B' folder from isri-ocr-evolution-tools project (https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
+
 ```
-usage: pascalvoc_to_sa.py [-h] --pvoc-dir PVOC_DIR [-fd] [-fs]
+python3 run_api.py 
+```
+
+*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
+
+```
+Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
+[--verbose {0,1,2}]
 ```
 ```
 optional arguments:
-  -h, --help           show this help message and exit
-  --pvoc-dir PVOC_DIR  Path of the directory, which contains all output data
-                       of Pascal VOC
-  -fd                  Set if you want to convert from VOC's detection format
-  -fs                  Set if you want to convert from VOC's segmentation
-                       format
+  -h, --help         show this help message and exit
+  --input INPUT      Path to input files or folder with tesseract dict format.
+                     File name structure [IMAGE_NAME]___tess.json
+  --output OUTPUT    Path to output folder. File name structure
+                     [IMAGE_NAME]___objects.json
+  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
+                     converted files, 2 -- Prints number of converted files
+                     and unconverted files path.
 ```
 
 ##### *From* VOC detection format *to* annotate.online vector format

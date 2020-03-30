@@ -157,9 +157,9 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_de
 
 ### Tesseract OCR, with convertion to annotate.online
 
-**Note** : 'ocreval' metric was used for evaluation of accuracy. Make shure you have installed it before running. (https://github.com/eddieantonio/ocreval) 
+**Note** : `ocreval` metric was used for evaluation of accuracy. Make shure you have installed it before running. [here](https://github.com/eddieantonio/ocreval) 
 
-*please note*: 'tesseract_converters' folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the 'run_api.py' modify "DATA_PATH" variable. Test datasets exist on 'bus.4B' folder from isri-ocr-evolution-tools project (https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
+*please note*: `tesseract_converters` folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the `run_api.py` modify `DATA_PATH` variable. Test datasets exist on `bus.4B` folder from isri-ocr-evolution-tools project [here](https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
 
 ```
 python3 run_api.py 

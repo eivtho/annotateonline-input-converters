@@ -84,12 +84,15 @@ class ObjectDetectionStrategy(CoCoConverter):
     name = "ObjectDetection converter"
 
     def __init__(self, dataset_name, export_root, project_type, output_dir):
-        super().__init__(dataset_name, export_root, project_type, output_dir)
+        super().__init__(dataset_name, export_root, project_type, output_dir, task)
         self.__setup_conversion_algorithm()
 
     def __setup_conversion_algorithm(self):
         if self.project_type == 'pixel':
-            self.conversion_algorithm = sa_pixel_to_coco_instance_segmentation
+            if self.task == 'instance_segmentation':
+                self.conversion_algorithm = sa_pixel_to_coco_instance_segmentation
+            elif self.task == 'object_detection':
+                self.conversion_algorithm = sa_pixel_to_coco_object_detection
         elif self.project_type == 'vector':
             self.conversion_algorithm = sa_vector_to_coco_instance_segmentation
 

@@ -185,7 +185,7 @@ def move_files(train_set, test_set, src, cp):
 
 def create_classes_mapper(imgs, classes_json):
     classes = {}
-
+    print(classes_json)
     j_data = json.load(open(classes_json))
     for instance in j_data:
         if 'id' not in instance:

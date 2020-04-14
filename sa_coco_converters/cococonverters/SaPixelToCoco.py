@@ -2,11 +2,7 @@ import cv2 as cv
 from pycocotools import mask as cocomask
 import numpy as np
 
-
-def sa_pixel_to_coco_instance_segmentation(
-    make_annotation, image_commons, id_generator
-):
-
+def instance_object_commons( image_commons, id_generator):
     annotations_per_image = []
     sa_ann_json = image_commons.sa_ann_json
     image_info = image_commons.image_info
@@ -31,17 +27,37 @@ def sa_pixel_to_coco_instance_segmentation(
 
         bbox = cocomask.toBbox(coco_instance_mask).tolist()
         area = int(cocomask.area(coco_instance_mask))
-        segmentation = [
-            contour.flatten().tolist()
-            for contour in contours if len(contour.flatten().tolist()) >= 5
-        ]
-        if len(segmentation) == 0:
-            continue
-        annotations_per_image.append(
-            make_annotation(
-                category_id, image_info['id'], bbox, segmentation, area, anno_id
-            )
-        )
+
+        return (bbox,area)
+
+def sa_pixel_to_coco_object_detection(make_annotation, image_commons, id_generator):
+    bbox, area = instance_object_commons(image_commons, id_generator)
+
+    segmentation = [[bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1]]]
+
+    annotations_per_image.append(
+         make_annotation(
+             category_id, image_info['id'], bbox, segmentation, area, anno_id
+         )
+     )
+
+    return (image_info, annotations_per_image)
+
+
+def sa_pixel_to_coco_instance_segmentation(
+    make_annotation, image_commons, id_generator
+):
+
+    bbox, area = instance_object_commons(image_commons,id_generator)
+    segmentation = [
+         contour.flatten().tolist()
+         for contour in contours if len(contour.flatten().tolist()) >= 5
+     ]
+    annotations_per_image.append(
+         make_annotation(
+             category_id, image_info['id'], bbox, segmentation, area, anno_id
+         )
+     )
 
     return (image_info, annotations_per_image)
 

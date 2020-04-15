@@ -1,0 +1,189 @@
+[1mdiff --git a/sa_coco_converters/cococonverters/CoCoStrategies.py b/sa_coco_converters/cococonverters/CoCoStrategies.py[m
+[1mindex d026751..4d77d3d 100644[m
+[1m--- a/sa_coco_converters/cococonverters/CoCoStrategies.py[m
+[1m+++ b/sa_coco_converters/cococonverters/CoCoStrategies.py[m
+[36m@@ -7,7 +7,7 @@[m [mfrom tqdm import tqdm[m
+ from PIL import Image[m
+ from panopticapi.utils import IdGenerator, id2rgb[m
+ from .CoCoConverter import CoCoConverter[m
+[31m-from .SaPixelToCoco import sa_pixel_to_coco_instance_segmentation, sa_pixel_to_coco_panoptic_segmentation[m
+[32m+[m[32mfrom .SaPixelToCoco import sa_pixel_to_coco_instance_segmentation, sa_pixel_to_coco_panoptic_segmentation, sa_pixel_to_coco_object_detection[m
+ from .SaVectorToCoco import sa_vector_to_coco_instance_segmentation, sa_vector_to_coco_keypoint_detection[m
+ [m
+ [m
+[36m@@ -83,8 +83,12 @@[m [mclass PanopticConverterStrategy(CoCoConverter):[m
+ class ObjectDetectionStrategy(CoCoConverter):[m
+     name = "ObjectDetection converter"[m
+ [m
+[31m-    def __init__(self, dataset_name, export_root, project_type, output_dir):[m
+[31m-        super().__init__(dataset_name, export_root, project_type, output_dir, task)[m
+[32m+[m[32m    def __init__([m
+[32m+[m[32m        self, dataset_name, export_root, project_type, output_dir, task[m
+[32m+[m[32m    ):[m
+[32m+[m[32m        super().__init__([m
+[32m+[m[32m            dataset_name, export_root, project_type, output_dir, task[m
+[32m+[m[32m        )[m
+         self.__setup_conversion_algorithm()[m
+ [m
+     def __setup_conversion_algorithm(self):[m
+[36m@@ -134,7 +138,6 @@[m [mclass ObjectDetectionStrategy(CoCoConverter):[m
+         images = [][m
+         annotations = [][m
+         id_generator = self._make_id_generator()[m
+[31m-[m
+         for id_, json_ in tqdm(enumerate(jsons)):[m
+             try:[m
+                 res = self._sa_to_coco_single(id_, json_, id_generator)[m
+[1mdiff --git a/sa_coco_converters/cococonverters/SaPixelToCoco.py b/sa_coco_converters/cococonverters/SaPixelToCoco.py[m
+[1mindex 5b7e5b7..e69e703 100644[m
+[1m--- a/sa_coco_converters/cococonverters/SaPixelToCoco.py[m
+[1m+++ b/sa_coco_converters/cococonverters/SaPixelToCoco.py[m
+[36m@@ -2,44 +2,61 @@[m [mimport cv2 as cv[m
+ from pycocotools import mask as cocomask[m
+ import numpy as np[m
+ [m
+[31m-def instance_object_commons( image_commons, id_generator):[m
+[31m-    annotations_per_image = [][m
+[31m-    sa_ann_json = image_commons.sa_ann_json[m
+[31m-    image_info = image_commons.image_info[m
+[31m-    for instance in sa_ann_json:[m
+[31m-        if "parts" not in instance:[m
+[31m-            continue[m
+[31m-        anno_id = next(id_generator)[m
+[31m-        parts = [int(part["color"][1:], 16) for part in instance["parts"]][m
+ [m
+[31m-        category_id = instance['classId'][m
+[32m+[m[32mdef __instance_object_commons_per_instance([m
+[32m+[m[32m    instance, id_generator, image_commons[m
+[32m+[m[32m):[m
+[32m+[m[32m    if "parts" not in instance:[m
+[32m+[m[32m        return None[m
+[32m+[m[32m    anno_id = next(id_generator)[m
+[32m+[m[32m    parts = [int(part["color"][1:], 16) for part in instance["parts"]][m
+ [m
+[31m-        instance_bitmask = np.isin(image_commons.flat_mask, parts)[m
+[31m-        size = instance_bitmask.shape[::-1][m
+[32m+[m[32m    category_id = instance['classId'][m
+ [m
+[31m-        databytes = instance_bitmask * np.uint8(255)[m
+[31m-        contours, hierarchy = cv.findContours([m
+[31m-            databytes, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE[m
+[31m-        )[m
+[31m-        coco_instance_mask = cocomask.encode([m
+[31m-            np.asfortranarray(instance_bitmask)[m
+[31m-        )[m
+[32m+[m[32m    instance_bitmask = np.isin(image_commons.flat_mask, parts)[m
+[32m+[m[32m    size = instance_bitmask.shape[::-1][m
+ [m
+[31m-        bbox = cocomask.toBbox(coco_instance_mask).tolist()[m
+[31m-        area = int(cocomask.area(coco_instance_mask))[m
+[32m+[m[32m    databytes = instance_bitmask * np.uint8(255)[m
+[32m+[m[32m    contours, hierarchy = cv.findContours([m
+[32m+[m[32m        databytes, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE[m
+[32m+[m[32m    )[m
+[32m+[m[32m    coco_instance_mask = cocomask.encode(np.asfortranarray(instance_bitmask))[m
+ [m
+[31m-        return (bbox,area)[m
+[32m+[m[32m    bbox = cocomask.toBbox(coco_instance_mask).tolist()[m
+[32m+[m[32m    area = int(cocomask.area(coco_instance_mask))[m
+[32m+[m[32m    return (bbox, area, contours, category_id, anno_id)[m
+ [m
+[31m-def sa_pixel_to_coco_object_detection(make_annotation, image_commons, id_generator):[m
+[31m-    bbox, area = instance_object_commons(image_commons, id_generator)[m
+ [m
+[31m-    segmentation = [[bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1]]][m
+[32m+[m[32mdef instance_object_commons(image_commons, id_generator):[m
+[32m+[m[32m    sa_ann_json = image_commons.sa_ann_json[m
+[32m+[m[32m    commons_lst = [[m
+[32m+[m[32m        __instance_object_commons_per_instance(x, id_generator, image_commons)[m
+[32m+[m[32m        for x in sa_ann_json[m
+[32m+[m[32m    ][m
+[32m+[m[32m    return commons_lst[m
+[32m+[m
+ [m
+[31m-    annotations_per_image.append([m
+[31m-         make_annotation([m
+[31m-             category_id, image_info['id'], bbox, segmentation, area, anno_id[m
+[31m-         )[m
+[31m-     )[m
+[32m+[m[32mdef sa_pixel_to_coco_object_detection([m
+[32m+[m[32m    make_annotation, image_commons, id_generator[m
+[32m+[m[32m):[m
+[32m+[m[32m    commons_lst = instance_object_commons(image_commons, id_generator)[m
+[32m+[m[32m    annotations_per_image = [][m
+[32m+[m[32m    image_info = image_commons.image_info[m
+[32m+[m[32m    for common in commons_lst:[m
+[32m+[m
+[32m+[m[32m        bbox, area, contours, category_id, anno_id = common[m
+[32m+[m[32m        segmentation = [[m
+[32m+[m[32m            [[m
+[32m+[m[32m                bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2],[m
+[32m+[m[32m                bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1][m
+[32m+[m[32m            ][m
+[32m+[m[32m        ][m
+[32m+[m
+[32m+[m[32m        annotations_per_image.append([m
+[32m+[m[32m            make_annotation([m
+[32m+[m[32m                category_id, image_info['id'], bbox, segmentation, area, anno_id[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+ [m
+     return (image_info, annotations_per_image)[m
+ [m
+[36m@@ -47,17 +64,23 @@[m [mdef sa_pixel_to_coco_object_detection(make_annotation, image_commons, id_generat[m
+ def sa_pixel_to_coco_instance_segmentation([m
+     make_annotation, image_commons, id_generator[m
+ ):[m
+[31m-[m
+[31m-    bbox, area = instance_object_commons(image_commons,id_generator)[m
+[31m-    segmentation = [[m
+[31m-         contour.flatten().tolist()[m
+[31m-         for contour in contours if len(contour.flatten().tolist()) >= 5[m
+[31m-     ][m
+[31m-    annotations_per_image.append([m
+[31m-         make_annotation([m
+[31m-             category_id, image_info['id'], bbox, segmentation, area, anno_id[m
+[31m-         )[m
+[31m-     )[m
+[32m+[m[32m    commons_lst = instance_object_commons(image_commons, id_generator)[m
+[32m+[m[32m    image_info = image_commons.image_info[m
+[32m+[m[32m    annotations_per_image = [][m
+[32m+[m[32m    for common in commons_lst:[m
+[32m+[m[32m        if common is None:[m
+[32m+[m[32m            continue[m
+[32m+[m[32m        bbox, area, contours, category_id, anno_id = common[m
+[32m+[m[32m        segmentation = [[m
+[32m+[m[32m            contour.flatten().tolist()[m
+[32m+[m[32m            for contour in contours if len(contour.flatten().tolist()) >= 5[m
+[32m+[m[32m        ][m
+[32m+[m
+[32m+[m[32m        annotations_per_image.append([m
+[32m+[m[32m            make_annotation([m
+[32m+[m[32m                category_id, image_info['id'], bbox, segmentation, area, anno_id[m
+[32m+[m[32m            )[m
+[32m+[m[32m        )[m
+ [m
+     return (image_info, annotations_per_image)[m
+ [m
+[1mdiff --git a/sa_to_coco.py b/sa_to_coco.py[m
+[1mindex 547fd24..917957f 100644[m
+[1m--- a/sa_to_coco.py[m
+[1m+++ b/sa_to_coco.py[m
+[36m@@ -8,7 +8,7 @@[m [mimport logging[m
+ [m
+ import numpy as np[m
+ [m
+[31m-from sa_coco_converters.converters import Converter[m
+[32m+[m[32mfrom .sa_coco_converters.converters import Converter[m
+ [m
+ ALLOWED_TASK_TYPES = [[m
+     'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection'[m
+[36m@@ -214,7 +214,7 @@[m [mdef main(args, create_classes_mapper_fn=create_classes_mapper):[m
+         )[m
+         sys.exit()[m
+     try:[m
+[31m-        if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':[m
+[32m+[m[32m        if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation' or args.task == 'object_detection':[m
+             create_classes_mapper_fn([m
+                 args.output_dir,[m
+                 os.path.join(args.input_images_source, 'classes/classes.json')[m

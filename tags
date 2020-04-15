@@ -1,0 +1,119 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ALLOWED_CONVERSIONS	sa_to_coco.py	/^ALLOWED_CONVERSIONS = [$/;"	v
+ALLOWED_PROJECT_TYPES	sa_to_coco.py	/^ALLOWED_PROJECT_TYPES = ['pixel', 'vector']$/;"	v
+ALLOWED_TASK_TYPES	sa_to_coco.py	/^ALLOWED_TASK_TYPES = [$/;"	v
+CoCoConverter	sa_coco_converters/cococonverters/CoCoConverter.py	/^class CoCoConverter(object):$/;"	c
+Converter	sa_coco_converters/converters.py	/^class Converter(object):$/;"	c
+KeypointDetectionStrategy	sa_coco_converters/cococonverters/CoCoStrategies.py	/^class KeypointDetectionStrategy(CoCoConverter):$/;"	c
+ObjectDetectionStrategy	sa_coco_converters/cococonverters/CoCoStrategies.py	/^class ObjectDetectionStrategy(CoCoConverter):$/;"	c
+PanopticConverterStrategy	sa_coco_converters/cococonverters/CoCoStrategies.py	/^class PanopticConverterStrategy(CoCoConverter):$/;"	c
+__init__	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def __init__(self, dataset_name_, export_root_, project_type_, output_dir_):$/;"	m	class:CoCoConverter
+__init__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __init__(self, dataset_name, export_root, project_type, output_dir):$/;"	m	class:KeypointDetectionStrategy
+__init__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __init__(self, dataset_name, export_root, project_type, output_dir):$/;"	m	class:ObjectDetectionStrategy
+__init__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __init__(self, dataset_name, export_root, project_type, output_dir):$/;"	m	class:PanopticConverterStrategy
+__init__	sa_coco_converters/converters.py	/^    def __init__($/;"	m	class:Converter
+__load_one_json	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^    def __load_one_json(path_):$/;"	f	function:sa_vector_to_coco_keypoint_detection	file:
+__make_annotations	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^    def __make_annotations(template, id_generator, cat_id, image_id):$/;"	f	function:sa_vector_to_coco_keypoint_detection	file:
+__make_bbox	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^    def __make_bbox(points):$/;"	f	function:sa_vector_to_coco_keypoint_detection	file:
+__make_image_info	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def __make_image_info(self, json_path, id_, source_type):$/;"	m	class:CoCoConverter	file:
+__make_image_info	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __make_image_info(self, json_path, id_, source_type):$/;"	m	class:KeypointDetectionStrategy	file:
+__make_keypoints	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^    def __make_keypoints(template):$/;"	f	function:sa_vector_to_coco_keypoint_detection	file:
+__make_skeleton	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^    def __make_skeleton(template):$/;"	f	function:sa_vector_to_coco_keypoint_detection	file:
+__set_conversion_algorithm	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __set_conversion_algorithm(self):$/;"	m	class:PanopticConverterStrategy	file:
+__set_strategy	sa_coco_converters/converters.py	/^    def __set_strategy(self, c_strategy):$/;"	m	class:Converter	file:
+__setup_conversion_algorithm	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __setup_conversion_algorithm(self):$/;"	m	class:KeypointDetectionStrategy	file:
+__setup_conversion_algorithm	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __setup_conversion_algorithm(self):$/;"	m	class:ObjectDetectionStrategy	file:
+__str__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __str__(self):$/;"	m	class:KeypointDetectionStrategy	file:
+__str__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __str__(self, ):$/;"	m	class:ObjectDetectionStrategy	file:
+__str__	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def __str__(self, ):$/;"	m	class:PanopticConverterStrategy	file:
+_create_categories	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _create_categories(self, path_to_classes):$/;"	m	class:CoCoConverter
+_create_single_category	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _create_single_category(self, item):$/;"	m	class:CoCoConverter
+_create_skeleton	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _create_skeleton(self):$/;"	m	class:CoCoConverter
+_load_sa_jsons	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _load_sa_jsons(self):$/;"	m	class:CoCoConverter
+_make_id_generator	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _make_id_generator(self):$/;"	m	class:CoCoConverter
+_prepare_single_image_commons	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _prepare_single_image_commons(self, id_, json_path):$/;"	m	class:CoCoConverter
+_prepare_single_image_commons_pixel	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _prepare_single_image_commons_pixel(self, id_, json_path):$/;"	m	class:CoCoConverter
+_prepare_single_image_commons_vector	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def _prepare_single_image_commons_vector(self, id_, json_path):$/;"	m	class:CoCoConverter
+_sa_to_coco_single	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def _sa_to_coco_single(self, id_, json_path, id_generator):$/;"	m	class:ObjectDetectionStrategy
+_sa_to_coco_single	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def _sa_to_coco_single(self, id_, json_path, id_generator):$/;"	m	class:PanopticConverterStrategy
+_select_strategy	sa_coco_converters/converters.py	/^    def _select_strategy($/;"	m	class:Converter
+args	sa_to_coco.py	/^    args = parse_args()$/;"	v
+blue_color_generator	to_sa_converters/coco_to_sa.py	/^def blue_color_generator(n, hex_values=True):$/;"	f
+classes	to_sa_converters/pascalvoc_to_sa.py	/^classes = set()$/;"	v
+classes_dict	to_sa_converters/coco_to_sa.py	/^        classes_dict = {$/;"	v
+classes_dir	to_sa_converters/coco_to_sa.py	/^classes_dir = os.path.join(main_dir, "classes")$/;"	v
+classes_dir	to_sa_converters/pascalvoc_to_sa.py	/^classes_dir = os.path.join(sa_folder, "classes")$/;"	v
+classes_loader	to_sa_converters/coco_to_sa.py	/^classes_loader = []$/;"	v
+coco_json	to_sa_converters/coco_to_sa.py	/^coco_json = p.coco_json$/;"	v
+colors	to_sa_converters/coco_to_sa.py	/^    colors = blue_color_generator(len(json_data['categories']))$/;"	v
+convert_from_sa	sa_coco_converters/converters.py	/^    def convert_from_sa(self):$/;"	m	class:Converter
+copy_png	to_sa_converters/coco_to_sa.py	/^def copy_png():$/;"	f
+create_classes_mapper	sa_to_coco.py	/^def create_classes_mapper(imgs, classes_json):$/;"	f
+def_dict	to_sa_converters/coco_to_sa.py	/^def_dict = defaultdict(list)$/;"	v
+dict_setter	to_sa_converters/coco_to_sa.py	/^def dict_setter(list_of_dicts):$/;"	f
+f_loader	to_sa_converters/coco_to_sa.py	/^            f_loader = []$/;"	v
+f_loader	to_sa_converters/coco_to_sa.py	/^        f_loader = []$/;"	v
+help	to_sa_converters/pascalvoc_to_sa.py	/^    help="Path of the directory, which contains all output data of Pascal VOC"$/;"	v
+hex_to_rgb	to_sa_converters/coco_to_sa.py	/^def hex_to_rgb(hex_string):$/;"	f
+image_downloader	to_sa_converters/coco_to_sa.py	/^def image_downloader(url):$/;"	f
+index	to_sa_converters/coco_to_sa.py	/^                        index = cat['skeleton'].index(connection)$/;"	v
+json_data	to_sa_converters/coco_to_sa.py	/^json_data = json.load(open(os.path.join(coco_json_folder, coco_json_file)))$/;"	v
+keypoint_names	to_sa_converters/coco_to_sa.py	/^                keypoint_names = cat['keypoints']$/;"	v
+kp_loader	to_sa_converters/coco_to_sa.py	/^    kp_loader = []$/;"	v
+load_files	sa_to_coco.py	/^def load_files(path_to_imgs, ratio, task, ptype):$/;"	f
+loader	to_sa_converters/coco_to_sa.py	/^    loader = []$/;"	v
+main	sa_to_coco.py	/^def main(args, create_classes_mapper_fn=create_classes_mapper):$/;"	f
+main_dir	to_sa_converters/coco_to_sa.py	/^main_dir = os.path.join(os.path.abspath(coco_json) + "__formated")$/;"	v
+make_annotation	sa_coco_converters/cococonverters/CoCoStrategies.py	/^        def make_annotation($/;"	f	function:ObjectDetectionStrategy._sa_to_coco_single
+move_files	sa_to_coco.py	/^def move_files(train_set, test_set, src, cp):$/;"	f
+name	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    name = "ObjectDetection converter"$/;"	v	class:ObjectDetectionStrategy
+name	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    name = "Panoptic converter"$/;"	v	class:PanopticConverterStrategy
+name	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    name = 'Keypoint Detection Converter'$/;"	v	class:KeypointDetectionStrategy
+p	to_sa_converters/coco_to_sa.py	/^p = parser.parse_args()$/;"	v
+p	to_sa_converters/pascalvoc_to_sa.py	/^p = parser.parse_args()$/;"	v
+pan_loader	to_sa_converters/coco_to_sa.py	/^    pan_loader = []$/;"	v
+parse_args	sa_to_coco.py	/^def parse_args():$/;"	f
+parser	to_sa_converters/coco_to_sa.py	/^parser = argparse.ArgumentParser()$/;"	v
+parser	to_sa_converters/pascalvoc_to_sa.py	/^parser = argparse.ArgumentParser()$/;"	v
+passes_sanity_checks	sa_to_coco.py	/^def passes_sanity_checks(args):$/;"	f
+pl_key	to_sa_converters/coco_to_sa.py	/^                        pl_key = keypoint_names.index(kp_name)$/;"	v
+point_index	to_sa_converters/coco_to_sa.py	/^                        point_index = sa_points.index(point)$/;"	v
+pvoc_folder	to_sa_converters/pascalvoc_to_sa.py	/^pvoc_folder = p.pvoc_dir$/;"	v
+pvoc_json	to_sa_converters/pascalvoc_to_sa.py	/^            pvoc_json = eval(json.dumps(xmltodict.parse(open(os.path.join(root, file_name)).read())))$/;"	v
+pvoc_jsons	to_sa_converters/pascalvoc_to_sa.py	/^pvoc_jsons = []$/;"	v
+rename_png	to_sa_converters/coco_to_sa.py	/^def rename_png():$/;"	f
+required	to_sa_converters/pascalvoc_to_sa.py	/^    required=True,$/;"	v
+res_list	to_sa_converters/coco_to_sa.py	/^res_list = dict_setter(classes_loader)$/;"	v
+rgb_to_hex	to_sa_converters/coco_to_sa.py	/^def rgb_to_hex(rgb_tuple):$/;"	f
+rle_to_polygon	to_sa_converters/coco_to_sa.py	/^def rle_to_polygon(annotation):$/;"	f
+sa_bbox	to_sa_converters/pascalvoc_to_sa.py	/^                sa_bbox = {$/;"	v
+sa_bbox	to_sa_converters/pascalvoc_to_sa.py	/^            sa_bbox = {$/;"	v
+sa_class	to_sa_converters/pascalvoc_to_sa.py	/^    sa_class = {$/;"	v
+sa_classes	to_sa_converters/pascalvoc_to_sa.py	/^sa_classes = []$/;"	v
+sa_dict	to_sa_converters/coco_to_sa.py	/^                    sa_dict = {$/;"	v
+sa_dict_bbox	to_sa_converters/coco_to_sa.py	/^                    sa_dict_bbox = {$/;"	v
+sa_dict_bbox	to_sa_converters/coco_to_sa.py	/^                sa_dict_bbox = {$/;"	v
+sa_folder	to_sa_converters/pascalvoc_to_sa.py	/^sa_folder = os.path.join(os.path.abspath(pvoc_folder) + "__converted")$/;"	v
+sa_loader	to_sa_converters/pascalvoc_to_sa.py	/^    sa_loader = []$/;"	v
+sa_pixel_to_coco_instance_segmentation	sa_coco_converters/cococonverters/SaPixelToCoco.py	/^def sa_pixel_to_coco_instance_segmentation($/;"	f
+sa_pixel_to_coco_panoptic_segmentation	sa_coco_converters/cococonverters/SaPixelToCoco.py	/^def sa_pixel_to_coco_panoptic_segmentation(image_commons, id_generator):$/;"	f
+sa_points	to_sa_converters/coco_to_sa.py	/^            sa_points = [$/;"	v
+sa_polygon_loader	to_sa_converters/coco_to_sa.py	/^                    sa_polygon_loader = [$/;"	v
+sa_polygon_loader	to_sa_converters/coco_to_sa.py	/^                sa_polygon_loader = [$/;"	v
+sa_template	to_sa_converters/coco_to_sa.py	/^                    sa_template = {$/;"	v
+sa_to_output_format	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def sa_to_output_format(self):$/;"	m	class:KeypointDetectionStrategy
+sa_to_output_format	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def sa_to_output_format(self):$/;"	m	class:ObjectDetectionStrategy
+sa_to_output_format	sa_coco_converters/cococonverters/CoCoStrategies.py	/^    def sa_to_output_format(self):$/;"	m	class:PanopticConverterStrategy
+sa_vector_to_coco_instance_segmentation	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^def sa_vector_to_coco_instance_segmentation($/;"	f
+sa_vector_to_coco_keypoint_detection	sa_coco_converters/cococonverters/SaVectorToCoco.py	/^def sa_vector_to_coco_keypoint_detection($/;"	f
+set_dataset_name	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def set_dataset_name(self, dname):$/;"	m	class:CoCoConverter
+set_export_root	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def set_export_root(self, export_dir):$/;"	m	class:CoCoConverter
+set_num_converted	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def set_num_converted(self, num_converted_):$/;"	m	class:CoCoConverter
+set_output_dir	sa_coco_converters/cococonverters/CoCoConverter.py	/^    def set_output_dir(self, output_dir_):$/;"	m	class:CoCoConverter
+type	to_sa_converters/pascalvoc_to_sa.py	/^    type=str,$/;"	v
+xml	to_sa_converters/pascalvoc_to_sa.py	/^            xml = file_name$/;"	v

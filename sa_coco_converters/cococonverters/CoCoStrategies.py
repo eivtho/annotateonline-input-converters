@@ -7,7 +7,7 @@ from tqdm import tqdm
 from PIL import Image
 from panopticapi.utils import IdGenerator, id2rgb
 from .CoCoConverter import CoCoConverter
-from .SaPixelToCoco import sa_pixel_to_coco_instance_segmentation, sa_pixel_to_coco_panoptic_segmentation
+from .SaPixelToCoco import sa_pixel_to_coco_instance_segmentation, sa_pixel_to_coco_panoptic_segmentation, sa_pixel_to_coco_object_detection
 from .SaVectorToCoco import sa_vector_to_coco_instance_segmentation, sa_vector_to_coco_keypoint_detection
 
 
@@ -83,8 +83,12 @@ class PanopticConverterStrategy(CoCoConverter):
 class ObjectDetectionStrategy(CoCoConverter):
     name = "ObjectDetection converter"
 
-    def __init__(self, dataset_name, export_root, project_type, output_dir):
-        super().__init__(dataset_name, export_root, project_type, output_dir, task)
+    def __init__(
+        self, dataset_name, export_root, project_type, output_dir, task
+    ):
+        super().__init__(
+            dataset_name, export_root, project_type, output_dir, task
+        )
         self.__setup_conversion_algorithm()
 
     def __setup_conversion_algorithm(self):
@@ -134,7 +138,6 @@ class ObjectDetectionStrategy(CoCoConverter):
         images = []
         annotations = []
         id_generator = self._make_id_generator()
-
         for id_, json_ in tqdm(enumerate(jsons)):
             try:
                 res = self._sa_to_coco_single(id_, json_, id_generator)

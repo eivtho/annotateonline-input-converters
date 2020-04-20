@@ -8,7 +8,7 @@ import logging
 
 import numpy as np
 
-from sa_coco_converters.converters import Converter
+from .sa_coco_converters.converters import Converter
 
 ALLOWED_TASK_TYPES = [
     'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection'
@@ -185,7 +185,6 @@ def move_files(train_set, test_set, src, cp):
 
 def create_classes_mapper(imgs, classes_json):
     classes = {}
-
     j_data = json.load(open(classes_json))
     for instance in j_data:
         if 'id' not in instance:
@@ -214,7 +213,7 @@ def main(args, create_classes_mapper_fn=create_classes_mapper):
         )
         sys.exit()
     try:
-        if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation':
+        if args.task == 'instance_segmentation' or args.task == 'panoptic_segmentation' or args.task == 'object_detection':
             create_classes_mapper_fn(
                 args.output_dir,
                 os.path.join(args.input_images_source, 'classes/classes.json')

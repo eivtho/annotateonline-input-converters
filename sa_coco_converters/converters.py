@@ -35,9 +35,9 @@ class Converter(object):
     def _select_strategy(
         self, project_type, task, dataset_name, export_root, output_dir
     ):
-        if task == 'instance_segmentation':
+        if task == 'instance_segmentation' or task == 'object_detection':
             c_strategy = ObjectDetectionStrategy(
-                dataset_name, export_root, project_type, output_dir
+                dataset_name, export_root, project_type, output_dir, task
             )
         if task == 'keypoint_detection':
             c_strategy = KeypointDetectionStrategy(
@@ -47,5 +47,4 @@ class Converter(object):
             c_strategy = PanopticConverterStrategy(
                 dataset_name, export_root, project_type, output_dir
             )
-
         self.__set_strategy(c_strategy)

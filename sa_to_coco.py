@@ -8,15 +8,17 @@ import logging
 
 import numpy as np
 
-from .sa_coco_converters.converters import Converter
+from sa_coco_converters.converters import Converter
 
 ALLOWED_TASK_TYPES = [
-    'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection'
+    'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection',
+    'object_detection'
 ]
 ALLOWED_PROJECT_TYPES = ['pixel', 'vector']
 ALLOWED_CONVERSIONS = [
     ('pixel', 'panoptic_segmentation'), ('pixel', 'instance_segmentation'),
-    ('vector', 'instance_segmentation'), ('vector', 'keypoint_detection')
+    ('vector', 'instance_segmentation'), ('vector', 'keypoint_detection'),
+    ('pixel', 'object_detection')
 ]
 
 

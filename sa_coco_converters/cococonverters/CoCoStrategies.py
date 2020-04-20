@@ -79,6 +79,7 @@ class PanopticConverterStrategy(CoCoConverter):
 
             coco_json.write(json_data)
 
+        self.set_num_converted(len(jsons))
 
 class ObjectDetectionStrategy(CoCoConverter):
     name = "ObjectDetection converter"
@@ -156,8 +157,7 @@ class ObjectDetectionStrategy(CoCoConverter):
         ) as coco_json:
             coco_json.write(json_data)
 
-        self.num_converted = len(jsons)
-
+        self.set_num_converted(len(jsons))
 
 class KeypointDetectionStrategy(CoCoConverter):
     name = 'Keypoint Detection Converter'
@@ -217,4 +217,4 @@ class KeypointDetectionStrategy(CoCoConverter):
         ) as coco_json:
             coco_json.write(json_data)
 
-        self.num_converted = len(jsons)
+        self.set_num_convernted(len(out_json['images']))

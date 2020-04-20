@@ -136,6 +136,26 @@ Projects that have type vector with polygon annotations can still be converted t
 python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_instance_segm -sr 80 -ptype vector -t instance_segmentation -dn test_instance -od output_inst -cp True
 
 ```
+#### Object detection 
+
+Object detecion is similar to instance segmentation in the sense that it can be used with both
+vector and pixel SA annotations. This function takes the bounding box of the instance and uses it 
+as a segmentation mask, effectively turning instance segmentation task into bounding-box detection
+problem. 
+
+The command is:
+
+
+```
+python sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype [project type] -t object_detection -dn [dataset_name] -od [output_directory] -cp [CopyQ]
+
+```
+*example*
+
+```
+python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_pixel_instance_segm -sr 80 -ptype pixel -t object_detection -dn test_object -od output_objects -cp True
+
+```
 
 
 #### Keypoint detection

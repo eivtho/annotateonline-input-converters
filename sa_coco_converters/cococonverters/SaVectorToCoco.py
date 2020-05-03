@@ -123,8 +123,7 @@ def sa_vector_to_coco_keypoint_detection(
                 supercategory = instance['className']
                 name = instance['templateName']
             except Exception as e:
-                print('vigen')
-                print(e)
+                logging.error(e)
 
             category_item = {
                 'name': name,

@@ -93,11 +93,13 @@ class ObjectDetectionStrategy(CoCoConverter):
         self.__setup_conversion_algorithm()
 
     def __setup_conversion_algorithm(self):
+
         if self.project_type == 'pixel':
             if self.task == 'instance_segmentation':
                 self.conversion_algorithm = sa_pixel_to_coco_instance_segmentation
             elif self.task == 'object_detection':
                 self.conversion_algorithm = sa_pixel_to_coco_object_detection
+
         elif self.project_type == 'vector':
             self.conversion_algorithm = sa_vector_to_coco_instance_segmentation
 
@@ -112,6 +114,8 @@ class ObjectDetectionStrategy(CoCoConverter):
         def make_annotation(
             category_id, image_id, bbox, segmentation, area, anno_id
         ):
+            if self.task == 'object_detection':
+                segmentation = [[bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1]]]
             annotation = {
                 'id': anno_id,  # making sure ids are unique
                 'image_id': image_id,

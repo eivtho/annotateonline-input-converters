@@ -120,9 +120,9 @@ def load_files(path_to_imgs, ratio, task, ptype):
         suffix = '___pixel.json'
     else:
         suffix = '___objects.json'
-    orig_images = glob.glob(os.path.join(path_to_imgs, '*[!*mapper.json].*'))
-    orig_images = [x for x in orig_images if '___' not in x.split('.')[-2]]
-
+    orig_images = glob.glob(os.path.join(path_to_imgs, '*'))
+    orig_images = [x for x in orig_images if '___' not in x.split('.')[-2] and x[17:] != "mapper.json"]
+ori
     all_files = None
     if task == 'keypoint_detection':
         all_files = np.array([(fname, fname + suffix) for fname in orig_images])

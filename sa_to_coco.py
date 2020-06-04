@@ -255,7 +255,6 @@ def main(args, create_classes_mapper_fn=create_classes_mapper):
             logging.error(e)
             sys.exit()
 
-    num_converted = converter.strategy.num_converted
     converter.strategy.set_dataset_name(args.dataset_name + '_test')
     converter.strategy.set_export_root(
         os.path.join(args.output_dir, 'test_set')

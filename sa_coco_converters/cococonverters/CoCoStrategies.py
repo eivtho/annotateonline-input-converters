@@ -221,4 +221,4 @@ class KeypointDetectionStrategy(CoCoConverter):
         ) as coco_json:
             coco_json.write(json_data)
 
-        self.set_num_convernted(len(out_json['images']))
+        self.set_num_converted(len(out_json['images']))

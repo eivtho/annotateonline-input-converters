@@ -246,7 +246,7 @@ def main(args, create_classes_mapper_fn=create_classes_mapper):
 
     if train_set is not None:
         converter.strategy.set_dataset_name(args.dataset_name + '_train')
-
+        print(converter.strategy)
         try:
             converter.convert_from_sa()
         except Exception as e:

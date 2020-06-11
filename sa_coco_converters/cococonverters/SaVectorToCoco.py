@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import json
 from pycocotools import mask as cocomask
-
+import logging
 
 def sa_vector_to_coco_instance_segmentation(
     make_annotation, image_commons, id_generator
@@ -53,12 +53,17 @@ def sa_vector_to_coco_keypoint_detection(
         return res
 
     def __make_keypoints(template):
+        print(template)
         int_dict = {
             int(key): value
             for key, value in template['pointLabels'].items()
         }
 
-        return [int_dict[i] for i in range(len(int_dict))]
+        print("arinq")
+        print(int_dict)
+        res =  [int_dict[i] for i in range(1, len( int_dict) + 1)]
+        print(res)
+        return res
 
     def __make_bbox(points):
         xs = [point['x'] for point in points]
@@ -105,26 +110,27 @@ def sa_vector_to_coco_keypoint_detection(
         json_data = __load_one_json(path_)
 
         for instance in json_data:
-            if instance['type'] == 'template' and 'templateName' not in instance:
+            if instance['type'] == 'template' and 'templateId' not in instance:
                 logging.warning(
                     'There was a template with no "templateName". \
                                 This can happen if the template was deleted from annotate.online. Ignoring this annotation'
                 )
                 continue
 
-            if instance['type'] != 'template' or instance['templateName'
+            if instance['type'] != 'template' or instance['templateId'
                                                          ] in template_names:
                 continue
+            if instance['pointLabels'] == {}:
+                instance['pointLabels']={x['id']:x['id'] for x in instance['points']}
             try:
-                template_names.add(instance['templateName'])
+                template_names.add(str(instance['templateId']))
                 skeleton = __make_skeleton(instance)
                 keypoints = __make_keypoints(instance)
                 id_ = next(id_generator)
-                supercategory = instance['className']
-                name = instance['templateName']
+                supercategory = str(instance['templateId'])
+                name = str(instance['templateId'])
             except Exception as e:
                 logging.error(e)
-
             category_item = {
                 'name': name,
                 'supercategory': supercategory,
@@ -141,7 +147,7 @@ def sa_vector_to_coco_keypoint_detection(
             cat_id = None
             if instance['type'] == 'template':
                 for cat in categories:
-                    if cat['name'] == instance['templateName']:
+                    if cat['name'] == instance['templateId']:
                         cat_id = cat['id']
 
                 annotation = __make_annotations(

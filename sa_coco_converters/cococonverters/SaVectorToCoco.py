@@ -23,8 +23,8 @@ def sa_vector_to_coco_instance_segmentation(
                                                              []).append(points)
 
     for polygon_group in grouped_polygons.values():
-        anno_id = next(id_generator)
         for cat_id, polygons in polygon_group.items():
+            anno_id = next(id_generator)
             try:
                 masks = cocomask.frPyObjects(
                     polygons, image_info['height'], image_info['width']

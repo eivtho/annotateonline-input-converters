@@ -4,6 +4,36 @@ import json
 from pycocotools import mask as cocomask
 import logging
 
+def sa_vector_to_coco_object_detection(
+    make_annotation, image_commons, id_generator
+):
+    print("converting to coco, vector object detection")
+    annotations_per_image = []
+    image_info = image_commons.image_info
+    sa_ann_json = image_commons.sa_ann_json
+
+    for instance in sa_ann_json:
+        if instance['type'] != 'bbox':
+            continue
+
+        anno_id = next(id_generator)
+
+        try:
+            category_id = instance['classId']
+            points = instance['points']
+            for key in points:
+                points[key] = round(points[key],2)
+            bbox = (points['x1'], points['y1'], points['x2']-points['x1'], points['y2']-points['y1'])
+            polygons  = bbox
+            area = int((points['x2'] - points['x1']) * points['y2']-points['y1'])
+
+            annotation = make_annotation(category_id, image_info['id'],bbox, polygons, area, anno_id)
+            annotations_per_image.append(annotation)
+        except Exception as e:
+            print(e)
+
+
+    return image_info, annotations_per_image
 def sa_vector_to_coco_instance_segmentation(
     make_annotation, image_commons, id_generator
 ):

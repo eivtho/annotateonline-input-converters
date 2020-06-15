@@ -8,8 +8,7 @@ from PIL import Image
 from panopticapi.utils import IdGenerator, id2rgb
 from .CoCoConverter import CoCoConverter
 from .SaPixelToCoco import sa_pixel_to_coco_instance_segmentation, sa_pixel_to_coco_panoptic_segmentation, sa_pixel_to_coco_object_detection
-from .SaVectorToCoco import sa_vector_to_coco_instance_segmentation, sa_vector_to_coco_keypoint_detection
-
+from .SaVectorToCoco import sa_vector_to_coco_instance_segmentation, sa_vector_to_coco_keypoint_detection, sa_vector_to_coco_object_detection
 
 class PanopticConverterStrategy(CoCoConverter):
     name = "Panoptic converter"
@@ -101,7 +100,10 @@ class ObjectDetectionStrategy(CoCoConverter):
                 self.conversion_algorithm = sa_pixel_to_coco_object_detection
 
         elif self.project_type == 'vector':
-            self.conversion_algorithm = sa_vector_to_coco_instance_segmentation
+            if self.task == 'instance_segmentation':
+                self.conversion_algorithm = sa_vector_to_coco_instance_segmentation
+            elif self.task == 'object_detection':
+                self.conversion_algorithm = sa_vector_to_coco_object_detection
 
     def __str__(self, ):
         return '{} object'.format(self.name)

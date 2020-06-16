@@ -15,7 +15,7 @@ class CoCoConverter(object):
         self.export_root = export_root_
         self.output_dir = output_dir_
         self.task = task_
-
+        self.failed_conversion_cnt = 0
     def _create_single_category(self, item):
         category = {
             'id': item.id,
@@ -35,6 +35,8 @@ class CoCoConverter(object):
     def set_dataset_name(self, dname):
         self.dataset_name = dname
 
+    def increase_converted_count(self):
+        self.failed_conversion_cnt = self.failed_conversion_cnt + 1
     def set_num_converted(self, num_converted_):
         self.num_converted = num_converted_
 

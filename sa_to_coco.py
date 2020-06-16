@@ -5,7 +5,7 @@ import glob
 import shutil
 import json
 import logging
-
+import copy
 import numpy as np
 
 from .sa_coco_converters.converters import Converter
@@ -258,7 +258,8 @@ def main(args, create_classes_mapper_fn=create_classes_mapper):
     converter.strategy.set_export_root(
         os.path.join(args.output_dir, 'test_set')
     )
-
+    train_set_failed = copy.deepcopy(converter.strategy.failed_conversion_cnt)
+    converter.strategy.failed_conversion_cnt = 0
     if test_set is not None:
         try:
             converter.convert_from_sa()
@@ -269,9 +270,10 @@ def main(args, create_classes_mapper_fn=create_classes_mapper):
             logging.error(e)
             sys.exit()
 
+    test_set_failed = copy.deepcopy(converter.strategy.failed_conversion_cnt)
+
     logging.info('Conversion completed successfully')
-
-
+    return train_set_failed, test_set_failed
 if __name__ == '__main__':
     args = parse_args()
 

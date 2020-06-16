@@ -151,7 +151,8 @@ class ObjectDetectionStrategy(CoCoConverter):
             except Exception as e:
                 raise
             images.append(res[0])
-            if len(res[1])<1 or len(res[1]['segmentation'] ) < 1:
+            print(res[1])
+            if len(res[1])<1:
                 self.increase_converted_count()
             for ann in res[1]:
                 annotations.append(ann)

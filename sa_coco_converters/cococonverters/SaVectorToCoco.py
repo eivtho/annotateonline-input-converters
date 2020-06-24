@@ -17,7 +17,8 @@ def sa_vector_to_coco_object_detection(
             continue
 
         anno_id = next(id_generator)
-
+        if 'classId' in instance and instance['classId'] < 0:
+            continue
         try:
             category_id = instance['classId']
             points = instance['points']
@@ -44,6 +45,9 @@ def sa_vector_to_coco_instance_segmentation(
     sa_ann_json = image_commons.sa_ann_json
     for instance in sa_ann_json:
         if instance['type'] != 'polygon':
+            continue
+
+        if 'classId' in instance and instance['classId'] < 0:
             continue
 
         group_id = instance['groupId']

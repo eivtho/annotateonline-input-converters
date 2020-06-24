@@ -12,7 +12,8 @@ def __instance_object_commons_per_instance(
     parts = [int(part["color"][1:], 16) for part in instance["parts"]]
 
     category_id = instance['classId']
-
+    if category_id < 0:
+        continue
     instance_bitmask = np.isin(image_commons.flat_mask, parts)
     size = instance_bitmask.shape[::-1]
 
@@ -99,6 +100,7 @@ def sa_pixel_to_coco_panoptic_segmentation(image_commons, id_generator):
             continue
 
         parts = [int(part['color'][1:], 16) for part in instance['parts']]
+        if instance['classId']
         category_id = instance['classId']
         instance_bitmask = np.isin(flat_mask, parts)
         segment_id = next(id_generator)

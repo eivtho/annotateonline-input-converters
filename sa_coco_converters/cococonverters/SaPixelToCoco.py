@@ -100,7 +100,8 @@ def sa_pixel_to_coco_panoptic_segmentation(image_commons, id_generator):
             continue
 
         parts = [int(part['color'][1:], 16) for part in instance['parts']]
-        if instance['classId']
+        if instance['classId'] <0:
+            continue
         category_id = instance['classId']
         instance_bitmask = np.isin(flat_mask, parts)
         segment_id = next(id_generator)

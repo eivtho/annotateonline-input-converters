@@ -151,7 +151,6 @@ class ObjectDetectionStrategy(CoCoConverter):
             except Exception as e:
                 raise
             images.append(res[0])
-            print(res[1])
             if len(res[1])<1:
                 self.increase_converted_count()
             for ann in res[1]:
@@ -165,8 +164,7 @@ class ObjectDetectionStrategy(CoCoConverter):
             'w+'
         ) as coco_json:
             coco_json.write(json_data)
-        print("FAILED CONVERSION", self.failed_conversion_cnt)
-        #assert self.failed_conversion_cnt >= int(0.75 * len(jsons))
+        print("NUMBER OF IMAGES FAILED TO CONVERT", self.failed_conversion_cnt)
 
         self.set_num_converted(len(jsons))
 

@@ -16,9 +16,10 @@ def sa_vector_to_coco_object_detection(
         if instance['type'] != 'bbox':
             continue
 
-        anno_id = next(id_generator)
         if 'classId' in instance and instance['classId'] < 0:
             continue
+
+        anno_id = next(id_generator)
         try:
             category_id = instance['classId']
             points = instance['points']

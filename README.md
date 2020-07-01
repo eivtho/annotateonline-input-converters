@@ -247,8 +247,8 @@ python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
 python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
 ```
 
-## Contact
+## Questions and Issues
 
-For questions please contact Hovnatan Karapetyan at `hovnatan at superannotate.com`.
+For questions and issues please use this repo's Issue tracker on Github.
 
 

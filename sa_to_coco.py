@@ -8,7 +8,7 @@ import logging
 import copy
 import numpy as np
 
-from .sa_coco_converters.converters import Converter
+from sa_coco_converters.converters import Converter
 
 ALLOWED_TASK_TYPES = [
     'panoptic_segmentation', 'instance_segmentation', 'keypoint_detection',
@@ -120,9 +120,14 @@ def load_files(path_to_imgs, ratio, task, ptype):
         suffix = '___pixel.json'
     else:
         suffix = '___objects.json'
+
+    print("loading files")
     orig_images = glob.glob(os.path.join(path_to_imgs, '*'))
-    orig_images = [x for x in orig_images if '___' not in x.split('.')[-2] and x[17:] != "mapper.json"]
+    print(orig_images)
+    orig_images = [x for x in orig_images if not os.path.isdir(x) and  '___' not in x.split('.')[-2] and  "mapper.json" not in x]
     all_files = None
+    print(1)
+    print(orig_images)
     if task == 'keypoint_detection':
         all_files = np.array([(fname, fname + suffix) for fname in orig_images])
 
@@ -135,7 +140,8 @@ def load_files(path_to_imgs, ratio, task, ptype):
         )
     elif ptype == 'vector':
         all_files = np.array([(fname, fname + suffix) for fname in orig_images])
-
+    print(2)
+    print(all_files)
     num_train_vals = int(len(all_files) * (ratio / 100))
 
     num_test_vals = len(all_files) - num_train_vals

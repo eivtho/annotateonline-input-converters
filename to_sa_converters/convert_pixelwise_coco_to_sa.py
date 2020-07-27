@@ -11,13 +11,16 @@ def blue_color_generator(n, hex_values=True):
     hex_colors = []
     for i in range(n):
         int_color = i * 15
-        bgr_color = np.array([
-            int_color & 255, (int_color >> 8) & 255,
-            (int_color >> 16) & 255, 255
-        ],
-                             dtype=np.uint8)
-        hex_color = '#' + "{:02x}".format(bgr_color[2]) + "{:02x}".format(
-            bgr_color[1], ) + "{:02x}".format(bgr_color[0])
+        bgr_color = np.array(
+            [
+                int_color & 255, (int_color >> 8) & 255,
+                (int_color >> 16) & 255, 255
+            ],
+            dtype=np.uint8
+        )
+        hex_color = '#' + "{:02x}".format(
+            bgr_color[2]
+        ) + "{:02x}".format(bgr_color[1], ) + "{:02x}".format(bgr_color[0])
         if hex_values:
             hex_colors.append(hex_color)
         else:
@@ -36,18 +39,15 @@ def rgb_to_hex(rgb_tuple):
     return '#%02x%02x%02x' % rgb_tuple
 
 
-
 parser = argparse.ArgumentParser()
-parser.add_argument("--coco-json",
-                    type=str,
-                    required=True,
-                    help="Argument must be JSON file")
+parser.add_argument(
+    "--coco-json", type=str, required=True, help="Argument must be JSON file"
+)
 
 p = parser.parse_args()
 coco_path = p.coco_json
 coco_path_folder, coco_path_file = os.path.split(coco_path)
 
-print(coco_path_folder)
 with open(coco_path) as reader:
     coco_json = json.load(reader)
 
@@ -82,16 +82,22 @@ for image in image_list:
     for annotate in annotate_list:
         annot_name = os.path.splitext(annotate["file_name"])[0]
         if img_name == annot_name:
-            img_cv = cv2.imread(os.path.join(coco_path_folder,os.path.join("masks", img_name + ".png")))
+            img_cv = cv2.imread(
+                os.path.join(
+                    coco_path_folder, os.path.join("masks", img_name + ".png")
+                )
+            )
             if img_cv is None:
-                print("Error: '{}' file dosen't exist!".format(
-                    os.path.join("masks", img_name + ".png")))
+                print(
+                    "Error: '{}' file dosen't exist!".format(
+                        os.path.join("masks", img_name + ".png")
+                    )
+                )
                 break
 
             img = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
             H, W, C = img.shape
             img = img.reshape((H * W, C))
-
             segments = annotate["segments_info"]
             hex_colors = blue_color_generator(len(segments))
             out_json = []
@@ -101,18 +107,19 @@ for image in image_list:
                 dd = {
                     "classId": seg["category_id"],
                     "probability": 100,
+                    "visible": True,
                     "parts": [{
-                        "color": rgb_to_hex(tuple(id2rgb(seg["id"])))
+                        "color": hex_colors[i]
                     }],
                     "attributes": [],
                     "attributeNames": [],
                     "imageId": annotate["image_id"]
                 }
                 out_json.append(dd)
-
-            with open(os.path.join(sa_dir, img_name + ".jpg___pixel.json"), "w") as writer:
+            with open(
+                os.path.join(sa_dir, img_name + ".jpg___pixel.json"), "w"
+            ) as writer:
                 json.dump(out_json, writer, indent=2)
-            img = img.reshape((H, W, C))
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(os.path.join(sa_dir, img_name + ".png___save.png"),
-                        img)
+
+            img = cv2.cvtColor(img.reshape((H,W,C)), cv2.COLOR_RGB2BGR)
+            cv2.imwrite(os.path.join(sa_dir, img_name + ".jpg___save.png"), img)

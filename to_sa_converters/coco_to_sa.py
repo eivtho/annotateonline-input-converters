@@ -222,15 +222,18 @@ elif 'panoptic' in str(coco_json_file):
     pan_loader = []
     for annot in json_data['annotations']:
         for cat in json_data['categories']:
-            for si in annot['segments_info']:
+            blue_colors = blue_color_generator(len(annot['segments_info']))
+            for i, si in enumerate(annot['segments_info']):
 
                 if cat['id'] == si['category_id']:
                     sa_dict = {
                         'classId': cat['id'],
                         'probability': 100,
+                        'visible': True,
                         'parts':
                             [{
-                                'color': rgb_to_hex(tuple(id2rgb(si['id'])))
+                                # 'color': rgb_to_hex(tuple(id2rgb(si['id'])))
+                                'color': blue_colors[i]
                             }],
                         'attributes': [],
                         'attributeNames': [],

@@ -66,6 +66,18 @@ and their corresponding JSON files in annotate.online format and then will renam
 from `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
 in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
 
+##### **Panoptic segmentation 2**
+
+**Note**: Again there should be `panoptic_masks` named folder with json file to convert annotate.online format pixelwise. 
+
+*Example*
+```
+  python3 convert_pixelwise_coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/convert_pixel_coco_to_sa/coco_to_sa_examples_pixel.json
+```
+
+**Note**: After this command in current directory will be created `coco_to_sa_examples_pixel.json_formated` which will contain jsons and blue masks. 
+
+
 ### *From* annotate.online output *to* COCO input format
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
 ```

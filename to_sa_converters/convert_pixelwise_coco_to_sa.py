@@ -84,13 +84,13 @@ for image in image_list:
         if img_name == annot_name:
             img_cv = cv2.imread(
                 os.path.join(
-                    coco_path_folder, os.path.join("masks", img_name + ".png")
+                    coco_path_folder, os.path.join("panoptic_masks", img_name + ".png")
                 )
             )
             if img_cv is None:
                 print(
                     "Error: '{}' file dosen't exist!".format(
-                        os.path.join("masks", img_name + ".png")
+                        os.path.join("panoptic_masks", img_name + ".png")
                     )
                 )
                 break

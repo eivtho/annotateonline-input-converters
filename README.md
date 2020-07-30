@@ -7,10 +7,10 @@
   * [Tests](#tests)
 * [To annotate.online json format](#to-annotate-format)
   * [COCO to annotate.online](#coco-to-annotate)
-  * [VOC to annotate.online](#voc-to-annotate.online)
-  * [Tesseract OCR to annotate.online](#tesseract-ocr-to-annotate.online)
-* [From annotate.online format](#to-superannotate-format)
-  * [annotate.online to COCO](#annotate.online-to-coco)
+  * [VOC to annotate.online](#voc-to-annotate)
+  * [Tesseract OCR to annotate.online](#tesseract-to-annotate)
+* [From annotate.online format](#from-annotate-format)
+  * [annotate.online to COCO](#annotate-to-coco)
 * [Questions and Issues](#questions-and-issues)
 
 ## Installation
@@ -100,7 +100,7 @@ in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__forma
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise True
 ```
 
-### *From* Pascal VOC output *to* annotate.online input format
+### *From* Pascal VOC output *to* annotate.online input format <a name="voc-to-annotate"></a>
 
 All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
 
@@ -144,13 +144,38 @@ python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
 python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
 ```
 
+### Tesseract OCR, with convertion to annotate.online <a name="tesseract-to-annotate"></a>
 
+**Note** : `ocreval` metric was used for evaluation of accuracy. Make shure you have installed it before running. [here](https://github.com/eddieantonio/ocreval) 
 
+*please note*: `tesseract_converters` folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the `run_api.py` modify `DATA_PATH` variable. Test datasets exist on `bus.4B` folder from isri-ocr-evolution-tools project [here](https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
 
+```
+python3 run_api.py 
+```
 
+*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
 
+```
+Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
+[--verbose {0,1,2}]
+```
+```
+optional arguments:
+  -h, --help         show this help message and exit
+  --input INPUT      Path to input files or folder with tesseract dict format.
+                     File name structure [IMAGE_NAME]___tess.json
+  --output OUTPUT    Path to output folder. File name structure
+                     [IMAGE_NAME]___objects.json
+  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
+                     converted files, 2 -- Prints number of converted files
+                     and unconverted files path.
+```
 
-### *From* annotate.online output *to* COCO input format
+## From annotate.online json format <a name="from-annotate-format"></a>
+
+### *From* annotate.online output *to* COCO input format <a name="annotate-to-coco"></a>
+
 There are 5 dataset formats that coco dataset supports, they are accessible [here](http://cocodataset.org/#format-data). We support several conversions from annotate.online formats to coco dataset formats. The command to do so is as follows:
 ```
 usage: sa_to_coco.py [-h] [-is INPUT_IMAGES_SOURCE]
@@ -257,34 +282,6 @@ python3 sa_to_coco.py -is [path_to_images] -sr [ratio] -ptype vector -t keypoint
 ```
 python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_det -sr 80 -ptype vector -t keypoint_detection -dn test_keyp -od output_keyp -cp True
 
-```
-
-### Tesseract OCR, with convertion to annotate.online
-
-**Note** : `ocreval` metric was used for evaluation of accuracy. Make shure you have installed it before running. [here](https://github.com/eddieantonio/ocreval) 
-
-*please note*: `tesseract_converters` folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the `run_api.py` modify `DATA_PATH` variable. Test datasets exist on `bus.4B` folder from isri-ocr-evolution-tools project [here](https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
-
-```
-python3 run_api.py 
-```
-
-*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
-
-```
-Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
-[--verbose {0,1,2}]
-```
-```
-optional arguments:
-  -h, --help         show this help message and exit
-  --input INPUT      Path to input files or folder with tesseract dict format.
-                     File name structure [IMAGE_NAME]___tess.json
-  --output OUTPUT    Path to output folder. File name structure
-                     [IMAGE_NAME]___objects.json
-  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
-                     converted files, 2 -- Prints number of converted files
-                     and unconverted files path.
 ```
 
 

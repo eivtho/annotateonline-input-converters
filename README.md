@@ -8,14 +8,15 @@
 * [To annotate.online json format](#to-annotate-format)
   * [From COCO output to annotate.online input](#coco-to-annotate)
   * [From Pascal VOC output to annotate.online input](#voc-to-annotate)
-  * [Tesseract OCR, with convertion to annotate.online](#tesseract-to-annotate)
 * [From annotate.online json format](#from-annotate-format)
   * [From annotate.online output to COCO input](#annotate-to-coco)
+* [Tesseract OCR, with convertion to annotate.online](#tesseract-to-annotate)
 * [Questions and Issues](#questions-and-issues)
+<!-- * [References](#references) -->
 
 ## Installation
 
-  Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
+Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
 installs required packages.
 
 ## Usage
@@ -59,7 +60,7 @@ Here we present few examples. COCO json example is in `../tests/toAnnotateOnline
 
 <!-- ##### **Object Detection** -->
 
-*Example 1* : Object detection
+*Example 1.1* : Object detection
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
 ```
@@ -70,7 +71,7 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
  -->
 <!-- ##### **Keypoint Detection** -->
 
-*Example 2* : Keypoint Detection
+*Example 1.2* : Keypoint Detection
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
@@ -79,7 +80,7 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
 <!-- ##### **Panoptic segmentation** -->
 
 
-*Example 3* : Panoptic segmentation
+*Example 1.3* : Panoptic segmentation
 
 **Reminder**: In addition to the `COCO_JSON` file you must also have a folder named `panoptic_masks` in the same directory, which will contain panoptic segmentation's png masks. 
 
@@ -92,7 +93,7 @@ in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__forma
 
 <!-- ##### **Panoptic segmentation 2** -->
 
-*Example 4* : Panoptic segmentation
+*Example 1.4* : Panoptic segmentation
 
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise True
@@ -118,59 +119,45 @@ optional arguments:
                        format
 ```
 
-##### *From* VOC detection format *to* annotate.online vector format
+<!-- ##### *From* VOC detection format *to* annotate.online vector format -->
 
+### *Examples*
+
+VOC2012 dataset example can be found in  `../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/` folder. Converter creates folder with the name `[PVOC_DIR]__converted_from_[TYPE]`. [TYPE] is either `segmentation` or `detection`, depending which `-fs` or `-fd` argument will be used.
+
+*Example 2.1* : VOC detection 
+
+
+<!-- *Usage*
 ```
 python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
 ```
-**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only bboxes.
-
-*Example*
-
+ -->
 ```
 python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
 ```
 
-##### *From* VOC segmentation format *to* annotate.online vector format
+**Note**: `-fd` uses `detection` it means annotate.online's JSONs will contain only bboxes.
 
+
+*Example 2.2* : VOC segmentation
+
+
+<!-- ##### *From* VOC segmentation format *to* annotate.online vector format -->
+
+
+<!-- *Usage*
 ```
 python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
 ```
-**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC detection format, which means there will be only polygons.
-
-*Example*
+ -->
+<!-- *Example* -->
 
 ```
 python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
 ```
+**Note**: `-fs` uses `segmentation` it means annotate.online's JSONs will contain only polygons.
 
-### Tesseract OCR, with convertion to annotate.online <a name="tesseract-to-annotate"></a>
-
-**Note** : `ocreval` metric was used for evaluation of accuracy. Make shure you have installed it before running. [here](https://github.com/eddieantonio/ocreval) 
-
-*please note*: `tesseract_converters` folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the `run_api.py` modify `DATA_PATH` variable. Test datasets exist on `bus.4B` folder from isri-ocr-evolution-tools project [here](https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
-
-```
-python3 run_api.py 
-```
-
-*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
-
-```
-Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
-[--verbose {0,1,2}]
-```
-```
-optional arguments:
-  -h, --help         show this help message and exit
-  --input INPUT      Path to input files or folder with tesseract dict format.
-                     File name structure [IMAGE_NAME]___tess.json
-  --output OUTPUT    Path to output folder. File name structure
-                     [IMAGE_NAME]___objects.json
-  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
-                     converted files, 2 -- Prints number of converted files
-                     and unconverted files path.
-```
 
 ## From annotate.online json format <a name="from-annotate-format"></a>
 
@@ -284,9 +271,38 @@ python sa_to_coco.py -is ./tests/fromAnnotateOnline/cats_dogs_vector_keypoint_de
 
 ```
 
+## Tesseract OCR, with convertion to annotate.online <a name="tesseract-to-annotate"></a>
+
+**Note** : `ocreval` metric was used for evaluation of accuracy. Make shure you have installed it before running. [here](https://github.com/eddieantonio/ocreval) 
+
+*please note*: `tesseract_converters` folder contains full pipline to run tesseract ocr on any document and convert it to annotate.online json file. Before running the `run_api.py` modify `DATA_PATH` variable. Test datasets exist on `bus.4B` folder from isri-ocr-evolution-tools project [here](https://code.google.com/archive/p/isri-ocr-evaluation-tools/downloads?page=1).
+
+```
+python3 run_api.py 
+```
+
+*please note*: You can use only 'tesseract_to_sa_converter.py' separatly, if you allready have tesseract json files. Make sure your data images name have following structure: `[IMAGE_NAME]___[REST_OF_NAME].json`  
+
+```
+Usage: python3 tesseract_to_sa_converter.py [-h] --input INPUT [--output OUTPUT]
+[--verbose {0,1,2}]
+```
+```
+optional arguments:
+  -h, --help         show this help message and exit
+  --input INPUT      Path to input files or folder with tesseract dict format.
+                     File name structure [IMAGE_NAME]___tess.json
+  --output OUTPUT    Path to output folder. File name structure
+                     [IMAGE_NAME]___objects.json
+  --verbose {0,1,2}  0 -- Doesn't print anything, 1 -- Prints number of
+                     converted files, 2 -- Prints number of converted files
+                     and unconverted files path.
+```
 
 ## Questions and Issues
 
 For questions and issues please use this repo's Issue tracker on Github.
 
+
+<!-- ## References -->
 

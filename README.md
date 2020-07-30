@@ -1,17 +1,17 @@
 # Python conversion scripts between annotate.online format and other common formats.
 
 ## Table of Contents 
-* [Installation][#installation]
-* [Usage][#usage]
-  * [Activate envirement][#activate-envirement]
-  * [Tests][#tests]
-* [To annotate.online json format][#to-annotate.online-format]
-  * [COCO to annotate.online][#coco-to-annotate.online]
-  * [VOC to annotate.online][#voc-to-annotate.online]
-  * [Tesseract OCR to annotate.online][#tesseract-ocr-to-annotate.online]
-* [From annotate.online format][#to-superannotate-format]
-  * [annotate.online to COCO][#annotate.online-to-coco]
-* [Questions and Issues][#questions-and-issues]
+* [Installation](#installation)
+* [Usage](#usage)
+  * [Activate envirement](#activate-envirement)
+  * [Tests](#tests)
+* [To annotate.online json format](#to-annotate.online-format)
+  * [COCO to annotate.online](#coco-to-annotate.online)
+  * [VOC to annotate.online](#voc-to-annotate.online)
+  * [Tesseract OCR to annotate.online](#tesseract-ocr-to-annotate.online)
+* [From annotate.online format](#to-superannotate-format)
+  * [annotate.online to COCO](#annotate.online-to-coco)
+* [Questions and Issues](#questions-and-issues)
 
 ## Installation
 

@@ -6,11 +6,11 @@
   * [Activate envirement](#activate-envirement)
   * [Tests](#tests)
 * [To annotate.online json format](#to-annotate-format)
-  * [COCO to annotate.online](#coco-to-annotate)
-  * [VOC to annotate.online](#voc-to-annotate)
-  * [Tesseract OCR to annotate.online](#tesseract-to-annotate)
-* [From annotate.online format](#from-annotate-format)
-  * [annotate.online to COCO](#annotate-to-coco)
+  * [From COCO output to annotate.online input](#coco-to-annotate)
+  * [From Pascal VOC output to annotate.online input](#voc-to-annotate)
+  * [Tesseract OCR, with convertion to annotate.online](#tesseract-to-annotate)
+* [From annotate.online json format](#from-annotate-format)
+  * [From annotate.online output to COCO input](#annotate-to-coco)
 * [Questions and Issues](#questions-and-issues)
 
 ## Installation
@@ -46,59 +46,59 @@ optional arguments:
   --pixelwise {False,True}
                         Convert panoptic mask pixelwise
 ```
-**Note**: For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images in the folder name `panoptic_masks`.
+**Note**: For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images in the folder name `panoptic_masks`. [--pixelwise] argument should be used only during panoptic conversion.
 
     python3 coco_to_sa.py --coco-json <input_coco_json> --pixelwise <{True,False}>
     
-**Note**: COCO_JSON file's name should contain one of these keywords: `instances` if task is object detection, 
-`keypoints` if task is keypoint detection and `panoptic` if task is panoptic segmentation!
+**Note**: COCO_JSON file's name should contain one of these keywords: `instances` if task is object detection, `keypoints` if task is keypoint detection and `panoptic` if task is panoptic segmentation! 
 
 
+#### *Examples*
 
-##### **Object Detection**
+Here we present few examples. COCO json example is in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` folder. Running converter will create new folder in that folder with following name `[COCO_JSON_NAME]___formated` which will contain all outputs. 
 
-*Example*
+<!-- ##### **Object Detection** -->
+
+*Example 1* : Object detection
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json
 ```
 
-**Note**: This command will create new `instances_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
+<!-- **Note**: This command will create new `instances_test.json__formated` directory in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
 and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
 in `./tests/toAnnotateOnline/fromCocoToAnnotateOnline/instances_test.json__formated/`, which will contain `classes.json`.
+ -->
+<!-- ##### **Keypoint Detection** -->
 
-##### **Keypoint Detection**
-
-*Example*
+*Example 2* : Keypoint Detection
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json
 ```
-**Note**: This command will create new `person_keypoints_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
-and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory 
-in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
+<!-- **Note**: This command will create new `person_keypoints_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images and their corresponding JSON files in annotate.online format. Besides, it will also be created `classes` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/person_keypoints_test.json__formated/`, which will contain `classes.json`.
+ -->
+<!-- ##### **Panoptic segmentation** -->
 
-##### **Panoptic segmentation**
 
-**Note**: For panoptic segmentation in addition to the `COCO_JSON` file you must also have a folder named `panoptic_masks` in the same directory
-which will contain panoptic segmentation's png masks.
+*Example 3* : Panoptic segmentation
 
-*Example*
+**Reminder**: In addition to the `COCO_JSON` file you must also have a folder named `panoptic_masks` in the same directory, which will contain panoptic segmentation's png masks. 
+
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise False
 ```
 
-**Note**: This command at first  will create new `panoptic_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
-and their corresponding JSON files in annotate.online format and then will rename and move png masks
-from `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory
-in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
+<!-- **Note**: This command at first  will create new `panoptic_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images and their corresponding JSON files in annotate.online format and then will rename and move png masks from `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_masks/` to `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`. Besides, it will also be created `classes` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__formated/`, which will contain `classes.json`.
+ -->
 
-##### **Panoptic segmentation 2**
+<!-- ##### **Panoptic segmentation 2** -->
 
-**Note**: Again there should be `panoptic_masks` named folder with json file to convert annotate.online format pixelwise. 
+*Example 4* : Panoptic segmentation
 
-*Example*
 ```
     python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise True
 ```
+**Note**: This example differs from *Examples 3*, that this one also creates blue masks. 
+
 
 ### *From* Pascal VOC output *to* annotate.online input format <a name="voc-to-annotate"></a>
 

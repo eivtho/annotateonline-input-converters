@@ -1,5 +1,18 @@
 # Python conversion scripts between annotate.online format and other common formats.
 
+## Table of Contents 
+* [Installation][#installation]
+* [Usage][#usage]
+  * [Activate envirement][#activate-envirement]
+  * [Tests][#tests]
+* [To annotate.online json format][#to-annotate.online-format]
+  * [COCO to annotate.online][#coco-to-annotate.online]
+  * [VOC to annotate.online][#voc-to-annotate.online]
+  * [Tesseract OCR to annotate.online][#tesseract-ocr-to-annotate.online]
+* [From annotate.online format][#to-superannotate-format]
+  * [annotate.online to COCO][#annotate.online-to-coco]
+* [Questions and Issues][#questions-and-issues]
+
 ## Installation
 
 Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
@@ -7,23 +20,34 @@ installs required packages.
 
 ## Usage
 
+### Activate envirement
 You need to activate python virtualenv with `source venv_sa_conv/bin/activate` beforehand.
 
-### *From* COCO output *to* annotate.online input format
+### Tests
+
+`annotateonline-input-converters/tests` contains few examples that can be helpful.
+
+## To annotate.online json format
+
+Below we have few converter which can help you to convert popular output json formats to annotate.online json format. 
+
+### COCO *to* annotate.online
 By following this [link](http://cocodataset.org/#format-results) you can find COCO dataset's result formats for object detection, panoptic segmentation and keypoint detection tasks.
 By running [coco_to_sa.py](https://github.com/superannotateai/annotateonline-input-converters/blob/master/to_sa_converters/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
 ```
-usage: coco_to_sa.py [-h] --coco-json COCO_JSON
+usage: coco_to_sa.py [-h] --coco-json COCO_JSON [--pixelwise {False,True}]
 ```
 ```
 optional arguments:
   -h, --help            show this help message and exit
   --coco-json COCO_JSON
                         Argument must be JSON file
+  --pixelwise {False,True}
+                        Convert panoptic mask pixelwise
 ```
-**Note**: For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images.
+**Note**: For conversation from COCO's object detection or keypoint detection tasks result formats to annotate.online's vector type all you need is COCO's single JSON file, but for panoptic segmentation -> pixelwise segmentation you also need annotated png images in the folder name `panoptic_masks`.
 
-    python3 coco_to_sa.py --coco-json <input_coco_json>
+    python3 coco_to_sa.py --coco-json <input_coco_json> --pixelwise <{True,False}>
     
 **Note**: COCO_JSON file's name should contain one of these keywords: `instances` if task is object detection, 
 `keypoints` if task is keypoint detection and `panoptic` if task is panoptic segmentation!
@@ -58,7 +82,7 @@ which will contain panoptic segmentation's png masks.
 
 *Example*
 ```
-    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise False
 ```
 
 **Note**: This command at first  will create new `panoptic_test.json__formated` directory in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/` which will contain original images
@@ -72,10 +96,57 @@ in `../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json__forma
 
 *Example*
 ```
-  python3 convert_pixelwise_coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/convert_pixel_coco_to_sa/coco_to_sa_examples_pixel.json
+    python3 coco_to_sa.py --coco-json ../tests/toAnnotateOnline/fromCocoToAnnotateOnline/panoptic_test.json --pixelwise True
 ```
 
-**Note**: After this command in current directory will be created `coco_to_sa_examples_pixel.json_formated` which will contain jsons and blue masks. 
+### *From* Pascal VOC output *to* annotate.online input format
+
+All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
+
+*please note*: We only support conversion from Pascal VOC format to annotate.online's vector format!
+```
+usage: pascalvoc_to_sa.py [-h] --pvoc-dir PVOC_DIR [-fd] [-fs]
+```
+```
+optional arguments:
+  -h, --help           show this help message and exit
+  --pvoc-dir PVOC_DIR  Path of the directory, which contains all output data
+                       of Pascal VOC
+  -fd                  Set if you want to convert from VOC's detection format
+  -fs                  Set if you want to convert from VOC's segmentation
+                       format
+```
+
+##### *From* VOC detection format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only bboxes.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
+```
+
+##### *From* VOC segmentation format *to* annotate.online vector format
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
+```
+**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC detection format, which means there will be only polygons.
+
+*Example*
+
+```
+python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
+```
+
+
+
+
+
 
 
 ### *From* annotate.online output *to* COCO input format
@@ -215,49 +286,6 @@ optional arguments:
                      and unconverted files path.
 ```
 
-### *From* Pascal VOC output *to* annotate.online input format
-
-All information about Pascal VOC challenge and format you can find [here](http://host.robots.ox.ac.uk/pascal/VOC/). We mainly focus on 2 challenges: segmentation and object detection.
-
-*please note*: We only support conversion from Pascal VOC format to annotate.online's vector format!
-```
-usage: pascalvoc_to_sa.py [-h] --pvoc-dir PVOC_DIR [-fd] [-fs]
-```
-```
-optional arguments:
-  -h, --help           show this help message and exit
-  --pvoc-dir PVOC_DIR  Path of the directory, which contains all output data
-                       of Pascal VOC
-  -fd                  Set if you want to convert from VOC's detection format
-  -fs                  Set if you want to convert from VOC's segmentation
-                       format
-```
-
-##### *From* VOC detection format *to* annotate.online vector format
-
-```
-python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fd]
-```
-**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC's detection format, which means there will be only bboxes.
-
-*Example*
-
-```
-python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fd
-```
-
-##### *From* VOC segmentation format *to* annotate.online vector format
-
-```
-python3 pascalvoc_to_sa.py --pvoc-dir PVOC_DIR [-fs]
-```
-**Note**: This command will create new directory in PVOC_DIR, which will contain annotate.online's JSONs converted from VOC detection format, which means there will be only polygons.
-
-*Example*
-
-```
-python3 pascalvoc_to_sa.py --pvoc-dir ../tests/toAnnotateOnline/fromPascalVOCToAnnotateOnline/VOC2012/ -fs
-```
 
 ## Questions and Issues
 

@@ -5,8 +5,8 @@
 * [Usage](#usage)
   * [Activate envirement](#activate-envirement)
   * [Tests](#tests)
-* [To annotate.online json format](#to-annotate.online-format)
-  * [COCO to annotate.online](#coco-to-annotate.online)
+* [To annotate.online json format](#to-annotate-format)
+  * [COCO to annotate.online](#coco-to-annotate)
   * [VOC to annotate.online](#voc-to-annotate.online)
   * [Tesseract OCR to annotate.online](#tesseract-ocr-to-annotate.online)
 * [From annotate.online format](#to-superannotate-format)
@@ -15,7 +15,7 @@
 
 ## Installation
 
-Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
+  Run `bash install.sh`. This adds python virtualenv `venv_sa_conv` and
 installs required packages.
 
 ## Usage
@@ -27,11 +27,12 @@ You need to activate python virtualenv with `source venv_sa_conv/bin/activate` b
 
 `annotateonline-input-converters/tests` contains few examples that can be helpful.
 
-## To annotate.online json format
+## To annotate.online json format <a name="to-annotate-format"></a>
 
 Below we have few converter which can help you to convert popular output json formats to annotate.online json format. 
 
-### COCO *to* annotate.online
+### *From* COCO output *to* annotate.online input <a name="coco-to-annotate"></a>
+
 By following this [link](http://cocodataset.org/#format-results) you can find COCO dataset's result formats for object detection, panoptic segmentation and keypoint detection tasks.
 By running [coco_to_sa.py](https://github.com/superannotateai/annotateonline-input-converters/blob/master/to_sa_converters/coco_to_sa.py) file you can convert COCO's result formats to annotate.online formats(vector or pixelwise segmentation depending on the type).
 ```

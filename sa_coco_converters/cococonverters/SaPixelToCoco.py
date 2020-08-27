@@ -32,31 +32,41 @@ def instance_object_commons(image_commons, id_generator):
         __instance_object_commons_per_instance(x, id_generator, image_commons)
         for x in sa_ann_json
     ]
+    commons_lst = [x for x in commons_lst if x != None]
+
     return commons_lst
 
 
 def sa_pixel_to_coco_object_detection(
     make_annotation, image_commons, id_generator
 ):
+
     commons_lst = instance_object_commons(image_commons, id_generator)
     annotations_per_image = []
     image_info = image_commons.image_info
     for common in commons_lst:
-
-        bbox, area, contours, category_id, anno_id = common
+        try:
+            bbox, area, contours, category_id, anno_id = common
+        except Exception as e:
+            import sys
+            sys.exit()
         segmentation = [
             [
-                bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2],
-                bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1]
+                 bbox[0], bbox[1], bbox[0], bbox[1] + bbox[3], bbox[0] + bbox[2],
+                 bbox[1] + bbox[3], bbox[0] + bbox[2], bbox[1]
             ]
         ]
 
-        annotations_per_image.append(
-            make_annotation(
-                category_id, image_info['id'], bbox, segmentation, area, anno_id
-            )
-        )
+        try:
+         annotations_per_image.append(
+             make_annotation(
+                 category_id, image_info['id'], bbox, segmentation, area, anno_id
+             )
 
+         )
+        except Exception as e:
+            import sys
+            sys.exit()
     return (image_info, annotations_per_image)
 
 

@@ -109,10 +109,8 @@ class ObjectDetectionStrategy(CoCoConverter):
         return '{} object'.format(self.name)
 
     def _sa_to_coco_single(self, id_, json_path, id_generator):
-
         image_commons = self._prepare_single_image_commons(id_, json_path)
         annotations_per_image = []
-
         def make_annotation(
             category_id, image_id, bbox, segmentation, area, anno_id
         ):
@@ -129,7 +127,6 @@ class ObjectDetectionStrategy(CoCoConverter):
             }
 
             return annotation
-
         res = self.conversion_algorithm(
             make_annotation, image_commons, id_generator
         )

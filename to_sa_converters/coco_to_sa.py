@@ -2,6 +2,7 @@ import argparse
 import os
 import json
 import shutil
+from tqdm import tqdm
 
 import requests
 import cv2
@@ -97,6 +98,7 @@ def rle_to_polygon(annotation):
 
 # Returns unique values of list. Values can be dicts or lists!
 def dict_setter(list_of_dicts):
+    print(list_of_dicts[1:5])
     return [
         d for n, d in enumerate(list_of_dicts) if d not in list_of_dicts[n + 1:]
     ]
@@ -129,93 +131,104 @@ def rename_png():
                     )
 
 
-# For that case if you need datasets original images
-for image in json_data['images']:
-    image_downloader(image['coco_url'])
+# We certainly don't need to download all the coco images for instance annotations. 
+# Not sure about the others so far.
+if 'instances' not in str(coco_json_file):
+    # For the case if you need dataset's original images
+    for image in json_data['images']:
+        image_downloader(image['coco_url'])
 
 # Classes
-for c in range(len(json_data['categories'])):
+print("Number of categories is {}".format(len(json_data['categories'])))
+for c, data in enumerate(json_data['categories']):
     colors = blue_color_generator(len(json_data['categories']))
-    for class_color in colors:
-        classes_dict = {
-            'name': json_data['categories'][c]['name'],
-            'id': json_data['categories'][c]['id'],
-            'color': colors[c],
-            'attribute_groups': []
-        }
-        classes_loader.append(classes_dict)
-res_list = dict_setter(classes_loader)
+    classes_dict = {
+        'name': data['name'],
+        'id': data['id'],
+        'color': colors[c],
+        'attribute_groups': []
+    }
+    classes_loader.append(classes_dict)
+res_list = classes_loader
+
 
 with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
     json.dump(res_list, classes_json, indent=2)
 
 # instances
 if 'instances' in str(coco_json_file):
+    image_id_to_annotations = {}
+    cat_id_to_cat = {}
+    for cat in json_data['categories']:
+        cat_id_to_cat[cat['id']] = cat
+    for annot in tqdm(json_data['annotations'], "Converting annotations"):
+        if 'iscrowd' in annot and annot['iscrowd'] == 1:
+            try:
+                annot['segmentation'] = rle_to_polygon(annot)
+            except IndexError:
+                print("List index out of range")
+        cat = cat_id_to_cat[annot['category_id']]
+        sa_dict_bbox = {
+            'type': 'bbox',
+            'points':
+                {
+                    'x1': annot['bbox'][0],
+                    'y1': annot['bbox'][1],
+                    'x2': annot['bbox'][0] + annot['bbox'][2],
+                    'y2': annot['bbox'][1] + annot['bbox'][3]
+                },
+            'className': cat['name'],
+            'classId': cat['id'],
+            'attributes': [],
+            'probability': 100,
+            'locked': False,
+            'visible': True,
+            'groupId': annot['id'],
+            'imageId': annot['image_id']
+        }
 
-    loader = []
-    for annot in json_data['annotations']:
-        for cat in json_data['categories']:
-            if annot['iscrowd'] == 1:
-                try:
-                    annot['segmentation'] = rle_to_polygon(annot)
-                except IndexError:
-                    print("List index out of range")
-            if cat['id'] == annot['category_id']:
-                sa_dict_bbox = {
-                    'type': 'bbox',
-                    'points':
-                        {
-                            'x1': annot['bbox'][0],
-                            'y1': annot['bbox'][1],
-                            'x2': annot['bbox'][0] + annot['bbox'][2],
-                            'y2': annot['bbox'][1] + annot['bbox'][3]
-                        },
-                    'className': cat['name'],
-                    'classId': cat['id'],
-                    'attributes': [],
-                    'probability': 100,
-                    'locked': False,
-                    'visible': True,
-                    'groupId': annot['id'],
-                    'imageId': annot['image_id']
-                }
+        sa_polygon_loader = [
+            {
+                'type': 'polygon',
+                'points': polygon,
+                'className': cat['name'],
+                'classId': cat['id'],
+                'attributes': [],
+                'probability': 100,
+                'locked': False,
+                'visible': True,
+                'groupId': annot['id'],
+                'imageId': annot['image_id']
+            } for polygon in annot['segmentation']
+        ]
+        for polygon in sa_polygon_loader:
+            if polygon['imageId'] not in image_id_to_annotations:
+                image_id_to_annotations[polygon['imageId']] = [polygon]
+            else:
+                image_id_to_annotations[polygon['imageId']].append(polygon)
+            if sa_dict_bbox['imageId'] not in image_id_to_annotations:
+                image_id_to_annotations[sa_dict_bbox['imageId']] = [sa_dict_bbox]
+            else:
+                image_id_to_annotations[sa_dict_bbox['imageId']].append(sa_dict_bbox)
 
-                sa_polygon_loader = [
-                    {
-                        'type': 'polygon',
-                        'points': polygon,
-                        'className': cat['name'],
-                        'classId': cat['id'],
-                        'attributes': [],
-                        'probability': 100,
-                        'locked': False,
-                        'visible': True,
-                        'groupId': annot['id'],
-                        'imageId': annot['image_id']
-                    } for polygon in annot['segmentation']
-                ]
-
-                for img in json_data['images']:
-                    for polygon in sa_polygon_loader:
-                        if polygon['imageId'] == img['id']:
-                            loader.append((img['id'], polygon))
-                        if sa_dict_bbox['imageId'] == img['id']:
-                            loader.append((img['id'], sa_dict_bbox))
-
-    for img in json_data['images']:
-        f_loader = []
-        for img_id, img_data in loader:
-            if img['id'] == img_id:
-                f_loader.append(img_data)
-                with open(
-                    os.path.join(
-                        main_dir, img['file_name'] + "___objects.json"
-                    ), "w"
-                ) as new_json:
-                    json.dump(dict_setter(f_loader), new_json, indent=2)
+    for img in tqdm(json_data['images'], "Writing annotations to disk"):
+        if img['id'] not in image_id_to_annotations:
+            continue
+        f_loader = image_id_to_annotations[img['id']]
+        if 'file_name' in img:
+            image_path = img['file_name']
+        else:
+            image_path = img['coco_url'].split('/')[-1]
+        with open(
+            os.path.join(
+                main_dir, image_path + "___objects.json"
+            ), "w"
+        ) as new_json:
+            json.dump(f_loader, new_json, indent=2)
 
 # panoptic
 elif 'panoptic' in str(coco_json_file):
+    print("Converting panoptic annotations.") 
     copy_png()
     rename_png()
 
@@ -255,6 +268,7 @@ elif 'panoptic' in str(coco_json_file):
 
 # keypoints
 elif 'keypoints' in str(coco_json_file):
+    print("Converting keypoint annotations.") 
     kp_loader = []
 
     for annot in json_data['annotations']:

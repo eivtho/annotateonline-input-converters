@@ -14,11 +14,18 @@ from panopticapi.utils import id2rgb
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "--coco-json", type=str, required=True, help="Argument must be JSON file"
+    "--coco-json", type=str, required=True, help="Input COCO JSON file"
 )
-p = parser.parse_args()
+parser.add_argument(
+    "--ungroup", type=bool, required=False, default=False, help="If true, sets group id to 0 for group ids which occur only once."
+)
+parser.add_argument(
+    "--skip_bbox_annotations", type=bool, required=False, default=False, help="If true, skips bbox annotations."
+)
 
-coco_json = p.coco_json
+args = parser.parse_args()
+
+coco_json = args.coco_json
 coco_json_folder, coco_json_file = os.path.split(coco_json)
 
 main_dir = os.path.join(os.path.abspath(coco_json) + "__formated")
@@ -130,38 +137,27 @@ def rename_png():
                         os.path.join(root, file), os.path.join(root, new_name)
                     )
 
+def write_annotations_to_files(image_id_to_annotations, json_data):
+    for img in tqdm(json_data['images'], "Writing annotations to disk"):
+        if img['id'] not in image_id_to_annotations:
+            continue
+        f_loader = image_id_to_annotations[img['id']]
+        if 'file_name' in img:
+            image_path = img['file_name']
+        else:
+            image_path = img['coco_url'].split('/')[-1]
+        with open(
+            os.path.join(
+                main_dir, image_path + "___objects.json"
+            ), "w"
+        ) as new_json:
+            json.dump(f_loader, new_json, indent=2)
 
-# We certainly don't need to download all the coco images for instance annotations. 
-# Not sure about the others so far.
-if 'instances' not in str(coco_json_file):
-    # For the case if you need dataset's original images
-    for image in json_data['images']:
-        image_downloader(image['coco_url'])
-
-# Classes
-print("Number of categories is {}".format(len(json_data['categories'])))
-for c, data in enumerate(json_data['categories']):
-    colors = blue_color_generator(len(json_data['categories']))
-    classes_dict = {
-        'name': data['name'],
-        'id': data['id'],
-        'color': colors[c],
-        'attribute_groups': []
-    }
-    classes_loader.append(classes_dict)
-res_list = classes_loader
-
-
-with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
-    json.dump(res_list, classes_json, indent=2)
-
-# instances
-if 'instances' in str(coco_json_file):
-    image_id_to_annotations = {}
+def generate_sa_annotations(json_data):
     cat_id_to_cat = {}
     for cat in json_data['categories']:
         cat_id_to_cat[cat['id']] = cat
-    for annot in tqdm(json_data['annotations'], "Converting annotations"):
+    for annot in json_data['annotations']:
         if 'iscrowd' in annot and annot['iscrowd'] == 1:
             try:
                 annot['segmentation'] = rle_to_polygon(annot)
@@ -201,31 +197,57 @@ if 'instances' in str(coco_json_file):
                 'imageId': annot['image_id']
             } for polygon in annot['segmentation']
         ]
+        yield (sa_dict_bbox, sa_polygon_loader)
+
+# We certainly don't need to download all the coco images for instance annotations. 
+# Not sure about the others so far.
+if 'instances' not in str(coco_json_file):
+    # For the case if you need dataset's original images
+    for image in json_data['images']:
+        image_downloader(image['coco_url'])
+
+# Classes
+print("Number of categories is {}".format(len(json_data['categories'])))
+for c, data in enumerate(json_data['categories']):
+    colors = blue_color_generator(len(json_data['categories']))
+    classes_dict = {
+        'name': data['name'],
+        'id': data['id'],
+        'color': colors[c],
+        'attribute_groups': []
+    }
+    classes_loader.append(classes_dict)
+res_list = classes_loader
+
+
+with open(os.path.join(classes_dir, "classes.json"), "w") as classes_json:
+    json.dump(res_list, classes_json, indent=2)
+
+# instances
+if 'instances' in str(coco_json_file):
+    image_id_to_annotations = {}
+    group_id_occurence_counts = {}
+    for (sa_dict_bbox, sa_polygon_loader) in tqdm(generate_sa_annotations(json_data), "Counting group occurence frequencies."):
         for polygon in sa_polygon_loader:
+            if polygon['groupId'] in group_id_occurence_counts.keys():
+                group_id_occurence_counts[polygon['groupId']] += 1
+            else:
+                group_id_occurence_counts[polygon['groupId']] = 1
+    for (sa_dict_bbox, sa_polygon_loader) in tqdm(generate_sa_annotations(json_data), "Converting annotations."):
+        for polygon in sa_polygon_loader:
+            if args.ungroup and (group_id_occurence_counts[polygon['groupId']] == 1):
+                polygon['groupId'] = 0
             if polygon['imageId'] not in image_id_to_annotations:
                 image_id_to_annotations[polygon['imageId']] = [polygon]
             else:
                 image_id_to_annotations[polygon['imageId']].append(polygon)
-            if sa_dict_bbox['imageId'] not in image_id_to_annotations:
-                image_id_to_annotations[sa_dict_bbox['imageId']] = [sa_dict_bbox]
-            else:
-                image_id_to_annotations[sa_dict_bbox['imageId']].append(sa_dict_bbox)
+            if not args.skip_bbox_annotations:
+                if sa_dict_bbox['imageId'] not in image_id_to_annotations:
+                    image_id_to_annotations[sa_dict_bbox['imageId']] = [sa_dict_bbox]
+                else:
+                    image_id_to_annotations[sa_dict_bbox['imageId']].append(sa_dict_bbox)
 
-    for img in tqdm(json_data['images'], "Writing annotations to disk"):
-        if img['id'] not in image_id_to_annotations:
-            continue
-        f_loader = image_id_to_annotations[img['id']]
-        if 'file_name' in img:
-            image_path = img['file_name']
-        else:
-            image_path = img['coco_url'].split('/')[-1]
-        with open(
-            os.path.join(
-                main_dir, image_path + "___objects.json"
-            ), "w"
-        ) as new_json:
-            json.dump(f_loader, new_json, indent=2)
-
+    write_annotations_to_files(image_id_to_annotations, json_data)
 # panoptic
 elif 'panoptic' in str(coco_json_file):
     print("Converting panoptic annotations.") 

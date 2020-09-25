@@ -1,5 +1,17 @@
-## This repository is deprecated. Please use our new Python SDK at https://github.com/superannotateai/superannotate-python-sdk. 
+## This repository is deprecated. Please use our new Python SDK at https://github.com/superannotateai/superannotate-python-sdk
 
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 
 # Python conversion scripts between annotate.online format and other common formats.

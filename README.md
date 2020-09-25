@@ -1,3 +1,6 @@
+# This repository is deprecated. Please use our new Python SDK at https://github.com/superannotateai/superannotate-python-sdk. 
+# Python SDK [documentation](https://superannotate.readthedocs.io/en/latest/) and [tutorial](https://superannotate.readthedocs.io/en/latest/tutorial.sdk.html).
+
 # Python conversion scripts between annotate.online format and other common formats.
 
 ## Table of Contents 

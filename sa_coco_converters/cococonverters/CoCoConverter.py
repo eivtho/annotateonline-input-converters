@@ -19,15 +19,15 @@ class CoCoConverter(object):
     def _create_single_category(self, item):
         category = {
             'id': item.id,
-            'name': item.class_name,
-            'supercategory': item.class_name,
+            'name': item.class_name['name'],
+            'supercategory': item.class_name['name'],
             'isthing': 1,
             'color': id2rgb(item.id)
         }
         return category
 
     def set_output_dir(self, output_dir_):
-        self.output_dir = outpud_dir_
+        self.output_dir = output_dir_
 
     def set_export_root(self, export_dir):
         self.export_root = export_dir
@@ -48,7 +48,7 @@ class CoCoConverter(object):
         with open(path_to_classes, 'r') as fp:
             classes = json.load(fp)
         categories = [
-            self._create_single_category(s_class(item, classes[item]))
+            self._create_single_category(s_class(item, item['id']))
             for item in classes
         ]
         return categories
@@ -135,10 +135,13 @@ class CoCoConverter(object):
 
         image_path = json_path[:-rm_len]
 
-        img_width, img_height = Image.open(image_path).size
+        # img_width, img_height = Image.open(image_path).size
+        metadata = json.load(open(json_path))['metadata']
+        img_width, img_height = metadata['width'], metadata['height']
         image_info = {
             'id': id_,
-            'file_name': image_path[len(self.output_dir) + 1:],
+            # 'file_name': image_path[len(self.output_dir) + 1:],
+            'file_name': f'https://media.digitalarkivet.no/image/{image_path.split("/")[-1]}',
             'height': img_height,
             'width': img_width,
             'license': 1
@@ -152,7 +155,7 @@ class CoCoConverter(object):
         image_info = self.__make_image_info(json_path, id_, self.project_type)
         sa_ann_json = json.load(open(json_path))
 
-        res = ImgCommons(image_info, sa_ann_json)
+        res = ImgCommons(image_info, sa_ann_json['instances'])
 
         return res
 
